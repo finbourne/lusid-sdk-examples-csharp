@@ -1,0 +1,116 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Lusid.Sdk.Api;
+using Lusid.Sdk.Examples.Utilities;
+using Lusid.Sdk.Model;
+using LusidFeatures;
+using NUnit.Framework;
+
+namespace Lusid.Sdk.Examples.Examples.Ibor
+{
+    [TestFixture]
+    public class Reconciliation: TutorialBase
+    {
+        private InstrumentLoader _instrumentLoader;
+        private IList<string> _instrumentIds;
+
+        [OneTimeSetUp]
+        public void SetUp()
+        {
+            
+            _instrumentLoader = new InstrumentLoader(_apiFactory);
+            _instrumentIds = _instrumentLoader.LoadInstruments();
+        }
+        
+        [LusidFeature("F16")]
+        [Test]
+        public void Reconcile_Portfolio()
+        {
+            //var portfolioCode = _testDataUtilities.CreateTransactionPortfolio(TestDataUtilities.TutorialScope);
+            var portfolioRequest = TestDataUtilities.BuildTransactionPortfolioRequest();
+            var portfolio = _transactionPortfoliosApi.CreatePortfolio(TestDataUtilities.TutorialScope, portfolioRequest);
+            Assert.That(portfolio?.Id.Code, Is.EqualTo(portfolioRequest.Code));
+            
+            var today = new DateTimeOffset(DateTimeOffset.UtcNow.Date).ToUniversalTime();
+            var yesterday = today.AddDays(-1).ToUniversalTime();
+            
+            //    Create transactions for yesterday
+            var yesterdaysTransactions = new List<TransactionRequest>
+            {
+                TestDataUtilities.BuildTransactionRequest(_instrumentIds[0], 1000, 100, "GBP", yesterday.AddHours(8), "StockIn"),
+                TestDataUtilities.BuildTransactionRequest(_instrumentIds[0], 2300, 101, "GBP", yesterday.AddHours(12), "StockIn"),
+                TestDataUtilities.BuildTransactionRequest(_instrumentIds[1], -1000, 102, "GBP", yesterday.AddHours(9), "StockIn"),
+                TestDataUtilities.BuildTransactionRequest(_instrumentIds[2], 1200, 103, "GBP", yesterday.AddHours(16), "StockIn"),
+                TestDataUtilities.BuildTransactionRequest(_instrumentIds[3], 2000, 103, "GBP", yesterday.AddHours(9), "StockIn")
+            };
+            
+            //    Add transactions
+            _apiFactory.Api<ITransactionPortfoliosApi>().UpsertTransactions(TestDataUtilities.TutorialScope, portfolioRequest.Code, yesterdaysTransactions);
+
+            var todaysTransactions = new List<TransactionRequest>
+            {
+                TestDataUtilities.BuildTransactionRequest(_instrumentIds[0], -3000, 101.78M, "GBP", today.AddHours(8), "StockIn"),    // net long 300
+                TestDataUtilities.BuildTransactionRequest(_instrumentIds[0], 1500, 101.78M, "GBP", today.AddHours(12), "StockIn"),    // net long 1800
+                TestDataUtilities.BuildTransactionRequest(_instrumentIds[1], 1000, 102, "GBP", today.AddHours(12), "StockIn"),       // flat                
+                TestDataUtilities.BuildTransactionRequest(_instrumentIds[2], 1200, 103, "GBP", today.AddHours(16), "StockIn"),       // long 2400
+                TestDataUtilities.BuildTransactionRequest(_instrumentIds[3], 1000, 103, "GBP", today.AddHours(9), "StockIn"),        // long 3000
+                TestDataUtilities.BuildTransactionRequest(_instrumentIds[3], 2000, 103, "GBP", today.AddHours(20), "StockIn")        // long 5000 but outside recon window
+            };
+
+            //    add transactions
+            var finalResult = _apiFactory.Api<ITransactionPortfoliosApi>().UpsertTransactions(TestDataUtilities.TutorialScope, portfolioRequest.Code, todaysTransactions);
+
+            //Using the last result find out its AsAtDate (based on the servers clock at the time of the test)
+            var finalAsAtTime = finalResult.Version.AsAtDate;
+
+            //So now we have the portfolio with 2 days worth of transactions, going to reconcile from T-1 20:00 to now,
+            //this should reflect breaks for each instrument equal to the transactions from yesterday till 20 today. 
+
+            var reconcileRequest =
+                new PortfoliosReconciliationRequest(
+                    new PortfolioReconciliationRequest(
+                        new ResourceId(TestDataUtilities.TutorialScope, portfolioRequest.Code),
+                        yesterday.AddHours(20).ToString("o"),
+                        finalAsAtTime),
+                    new PortfolioReconciliationRequest(
+                        new ResourceId(TestDataUtilities.TutorialScope, portfolioRequest.Code),
+                        today.AddHours(16).ToString("o"),
+                        finalAsAtTime),
+                    new List<string>());
+
+            var listOfBreaks = _apiFactory.Api<IReconciliationsApi>().ReconcileHoldings(portfoliosReconciliationRequest: reconcileRequest);
+
+            Console.WriteLine($"Breaks at {yesterday.AddHours(20)}");
+            PrintBreaks(listOfBreaks.Values);
+
+            /*
+                Expecting 
+                    _instrumentIds[0]    	-1500	-8094.73
+                    _instrumentIds[3]    	1000	10300
+                    _instrumentIds[2]    	1200	10300
+                    _instrumentIds[1]    	1000	-10200
+            */
+
+           Assert.AreEqual(listOfBreaks.Values.Count, 4);
+
+            var map = listOfBreaks.Values.ToDictionary(abreak => abreak.InstrumentUid);
+            Assert.AreEqual(map[_instrumentIds[0]].DifferenceUnits, -1500);
+            Assert.AreEqual(map[_instrumentIds[3]].DifferenceUnits, 1000);
+            Assert.AreEqual(map[_instrumentIds[2]].DifferenceUnits, 1200);
+            Assert.AreEqual(map[_instrumentIds[1]].DifferenceUnits, 1000);
+            
+            void PrintBreaks(IEnumerable<ReconciliationBreak> breaks)
+            {
+                foreach (var abreak in breaks)
+                {
+                    Console.WriteLine($"{abreak.InstrumentUid}\t{abreak.DifferenceUnits}\t{abreak.DifferenceCost.Amount}");
+                }
+
+                Console.WriteLine();
+            }
+        }
+
+        
+    }
+}

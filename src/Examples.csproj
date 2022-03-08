@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <RootNamespace>Lusid.Sdk.Examples</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="FluentCommandLineParser" Version="1.4.3" />
+      <PackageReference Include="Lusid.Sdk.Preview" Version="0.11.4102-HA" />
+      <PackageReference Include="LusidFeatures" Version="0.1.4" />
+      <PackageReference Include="NUnit" Version="3.13.2" />
+    </ItemGroup>
+
+</Project>
