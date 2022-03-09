@@ -8,7 +8,7 @@
 
     <ItemGroup>
       <PackageReference Include="FluentCommandLineParser" Version="1.4.3" />
-      <PackageReference Include="Lusid.Sdk.Preview" Version="0.11.4102-HA" />
+      <PackageReference Include="Lusid.Sdk.Preview" Version="0.11.4073" />
       <PackageReference Include="LusidFeatures" Version="0.1.4" />
       <PackageReference Include="NUnit" Version="3.13.2" />
     </ItemGroup>
