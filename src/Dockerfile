@@ -10,4 +10,5 @@ COPY LusidFeatureReporter/ /usr/src/LusidFeatureReporter/
 
 ENV FBN_LUSID_API_URL ${FBN_LUSID_API_URL}
 
+RUN chmod +x run.sh
 ENTRYPOINT ["./run.sh"]
