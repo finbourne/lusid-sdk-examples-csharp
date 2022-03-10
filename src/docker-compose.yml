@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+
+  lusid-sdk-examples-csharp-test:
+    build: .
+    container_name: lusid-sdk-examples-csharp
+    image: finbourne/lusid-sdk-examples-csharp
+    environment:
+      - FBN_TOKEN_URL
+      - FBN_USERNAME
+      - FBN_PASSWORD
+      - FBN_CLIENT_ID
+      - FBN_CLIENT_SECRET
+      - FBN_LUSID_API_URL
+      - FBN_APP_NAME
