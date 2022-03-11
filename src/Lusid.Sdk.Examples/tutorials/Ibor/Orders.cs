@@ -20,14 +20,10 @@ namespace Lusid.Sdk.Examples.Ibor
     {
         private InstrumentLoader _instrumentLoader;
         private IList<string> _instrumentIds;
-        
-        private readonly IDictionary<string, string> TutorialScopes = new Dictionary<string, string> {
-            {"simple-upsert", "Orders-SimpleUpsert-TestScope"},
-            {"unknown-instrument", "Orders-UnknownInstrument-TestScope"},
-            {"filtering", "Orders-Filter-TestScope"}
-        };
-        
-        private readonly IList<string> TutorialPropertyCodes = new List<string> {
+
+        private readonly IDictionary<string, string> _tutorialScopes = new Dictionary<string, string> { };
+
+        private readonly IList<string> _tutorialPropertyCodes = new List<string> {
             "TIF",
             "OrderBook",
             "PortfolioManager",
@@ -42,15 +38,45 @@ namespace Lusid.Sdk.Examples.Ibor
         {
             _instrumentLoader = new InstrumentLoader(_apiFactory);
             _instrumentIds = _instrumentLoader.LoadInstruments();
+
+            var guid = Guid.NewGuid().ToString();
+
+            _tutorialScopes["simple-upsert"] = $"Orders-SimpleUpsert-{guid}";
+            _tutorialScopes["unknown-instrument"] = $"Orders-UnknownInstrument-{guid}";
+            _tutorialScopes["filtering"] = $"Orders-Filter-{guid}";
             
             LoadProperties();
         }
 
+        [OneTimeTearDown]
+        public void TearDown()
+        {
+            var propertyDefinitionApi = _apiFactory.Api<IPropertyDefinitionsApi>();
+
+            try
+            {
+                foreach (var scope in _tutorialScopes.Values)
+                {
+                    foreach (var code in _tutorialPropertyCodes)
+                    {
+                        propertyDefinitionApi.DeletePropertyDefinition(
+                            domain: CreatePropertyDefinitionRequest.DomainEnum.Order.ToString(),
+                            scope: scope,
+                            code: code);
+                    }
+                }
+            }
+            catch (ApiException)
+            {
+                //  dont fail if delete fails
+            }
+        }
+
         private void LoadProperties()
         {
-            foreach (var scope in TutorialScopes.Values)
+            foreach (var scope in _tutorialScopes.Values)
             {
-                foreach (var code in TutorialPropertyCodes)
+                foreach (var code in _tutorialPropertyCodes)
                 {
                     //    Create the property definitions
                     try
@@ -87,7 +113,7 @@ namespace Lusid.Sdk.Examples.Ibor
         [Test]
         public void Upsert_Simple_Order()
         {
-            var testScope = TutorialScopes["simple-upsert"];
+            var testScope = _tutorialScopes["simple-upsert"];
             var order = $"Order-{Guid.NewGuid().ToString()}";
             var orderId = new ResourceId(testScope, order);
 
@@ -136,7 +162,7 @@ namespace Lusid.Sdk.Examples.Ibor
         [Test]
         public void Upsert_Simple_Order_With_Unknown_Instrument()
         {
-            var testScope = TutorialScopes["unknown-instrument"];
+            var testScope = _tutorialScopes["unknown-instrument"];
             var order = $"Order-{Guid.NewGuid().ToString()}";
             var orderId = new ResourceId(testScope, order);
 
@@ -185,7 +211,7 @@ namespace Lusid.Sdk.Examples.Ibor
         [Test]
         public void Update_Simple_Order()
         {
-            var testScope = TutorialScopes["simple-upsert"];
+            var testScope = _tutorialScopes["simple-upsert"];
             var order = $"Order-{Guid.NewGuid().ToString()}";
             var orderId = new ResourceId(testScope, order);
 
@@ -268,7 +294,7 @@ namespace Lusid.Sdk.Examples.Ibor
         [Test]
         public void Upsert_And_Retrieve_Simple_Orders()
         {
-            var testScope = TutorialScopes["filtering"];
+            var testScope = _tutorialScopes["filtering"];
             var order1 = $"Order-{Guid.NewGuid().ToString()}";
             var order2 = $"Order-{Guid.NewGuid().ToString()}";
             var order3 = $"Order-{Guid.NewGuid().ToString()}";
