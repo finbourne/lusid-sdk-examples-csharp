@@ -423,8 +423,8 @@ namespace Lusid.Sdk.Examples.MarketData
 
             try
             {
-                _apiFactory.Api<IInstrumentsApi>().DeleteInstrument("Figi", originalInstrument.ClientInternal);
-                _apiFactory.Api<IInstrumentsApi>().DeleteInstrument("Figi", newInstrument.ClientInternal);
+                _apiFactory.Api<IInstrumentsApi>().DeleteInstrument("ClientInternal", originalInstrument.ClientInternal);
+                _apiFactory.Api<IInstrumentsApi>().DeleteInstrument("ClientInternal", newInstrument.ClientInternal);
             }
             catch (ApiException ex)
             {
