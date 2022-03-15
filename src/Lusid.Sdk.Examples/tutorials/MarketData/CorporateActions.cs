@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text.Json;
 using Lusid.Sdk.Api;
 using Lusid.Sdk.Client;
@@ -420,8 +421,19 @@ namespace Lusid.Sdk.Examples.MarketData
 
             Assert.That(holdingsPostNameChangeList[0].InstrumentUid, Is.EqualTo(luidNew));
 
-            _apiFactory.Api<IInstrumentsApi>().DeleteInstrument("Figi", originalInstrument.Figi);
-            _apiFactory.Api<IInstrumentsApi>().DeleteInstrument("Figi", newInstrument.Figi);
+            try
+            {
+                _apiFactory.Api<IInstrumentsApi>().DeleteInstrument("Figi", originalInstrument.Figi);
+                _apiFactory.Api<IInstrumentsApi>().DeleteInstrument("Figi", newInstrument.Figi);
+            }
+            catch (ApiException ex)
+            {
+                if (ex.ErrorCode != (int)HttpStatusCode.NotFound)
+                {
+                    throw;
+                }
+            }
+            
         }
     }
 }
