@@ -221,7 +221,7 @@ namespace Lusid.Sdk.Examples.Instruments
             // CREATE the required market data, in this case a credit curve and a yield curve
             // The IsdaYieldCurve for a currency can be sourced from the daily set published by ISDA
             // The credit spreads can be sourced from an appropriate market data provider or internal marks
-            string ycXml = File.ReadAllText("../../../tutorials/Ibor/ExampleMarketData/IsdaYieldCurve_USD_20200605.xml");
+            string ycXml = File.ReadAllText($"{TestDataUtilities.ExampleMarketDataDirectory}/IsdaYieldCurve_USD_20200605.xml");
             var ycOpaque = new OpaqueMarketData(ycXml, "xml", "Example isda yield curve", ComplexMarketData.MarketDataTypeEnum.OpaqueMarketData);
             var upsertYcId = new ComplexMarketDataId("Lusid", effectiveAt: testNow, marketAsset: "IsdaYieldCurve/USD");
             var ccData = new CreditSpreadCurveData(
