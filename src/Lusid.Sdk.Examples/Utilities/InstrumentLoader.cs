@@ -43,21 +43,5 @@ namespace Lusid.Sdk.Examples.Utilities
             return ids.Values.Select(x => x.Value.LusidInstrumentId).OrderBy(i => i).ToList();
         }
 
-        public void DeleteInstruments()
-        {
-            var instruments = new List<string>
-            {
-                "BBG000C6K6G9",
-                "BBG000C04D57",
-                 "BBG000FV67Q4",
-                "BBG000BF0KW3",
-                "BBG000BF4KL1",
-            };
-
-            foreach (var instrument in instruments)
-            {
-                _apiFactory.Api<IInstrumentsApi>().DeleteInstrument("Figi", instrument);
-            }
-        }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text.Json;
 using Lusid.Sdk.Api;
 using Lusid.Sdk.Client;
@@ -333,11 +334,11 @@ namespace Lusid.Sdk.Examples.MarketData
             var portfolioCode = $"id-{uuid}";
             var transactions = new List<TransactionRequest>();
 
-            var originalInstrument = (Figi: "BBG000C6K6G9", Name: "VODAFONE GROUP PLC");
-            var newInstrument = (Figi: "BB5555555555", Name: "VODAFONE INCORPORATED");
+            var originalInstrument = (ClientInternal: "BBG000C6K6G9", Name: "VODAFONE GROUP PLC");
+            var newInstrument = (ClientInternal: "BB5555555555", Name: "VODAFONE INCORPORATED");
 
             // Define details for the corporate action.
-            var instruments = new List<(string Figi, string Name)>
+            var instruments = new List<(string ClientInternal, string Name)>
             {
                 originalInstrument,
                 newInstrument
@@ -348,16 +349,16 @@ namespace Lusid.Sdk.Examples.MarketData
 
             // Upsert Instruments
             var upsertResponse = _apiFactory.Api<IInstrumentsApi>().UpsertInstruments(instruments.ToDictionary(
-                k => k.Figi,
+                k => k.ClientInternal,
                 v => new InstrumentDefinition(
                     name: v.Name,
-                    identifiers: new Dictionary<string, InstrumentIdValue> { ["Figi"] = new InstrumentIdValue(v.Figi) }
+                    identifiers: new Dictionary<string, InstrumentIdValue> { ["ClientInternal"] = new InstrumentIdValue(v.ClientInternal) }
                 )
             ));
 
-            var instResponse = _apiFactory.Api<IInstrumentsApi>().GetInstruments("Figi", instruments.Select(i => i.Figi).ToList());
-            var luidOriginal = instResponse.Values.Where(i => i.Key == originalInstrument.Figi).Select(i => i.Value.LusidInstrumentId).First();
-            var luidNew = instResponse.Values.Where(i => i.Key == newInstrument.Figi).Select(i => i.Value.LusidInstrumentId).First();
+            var instResponse = _apiFactory.Api<IInstrumentsApi>().GetInstruments("ClientInternal", instruments.Select(i => i.ClientInternal).ToList());
+            var luidOriginal = instResponse.Values.Where(i => i.Key == originalInstrument.ClientInternal).Select(i => i.Value.LusidInstrumentId).First();
+            var luidNew = instResponse.Values.Where(i => i.Key == newInstrument.ClientInternal).Select(i => i.Value.LusidInstrumentId).First();
 
             // Create the portfolio
             var request = new CreateTransactionPortfolioRequest(
@@ -420,8 +421,19 @@ namespace Lusid.Sdk.Examples.MarketData
 
             Assert.That(holdingsPostNameChangeList[0].InstrumentUid, Is.EqualTo(luidNew));
 
-            _apiFactory.Api<IInstrumentsApi>().DeleteInstrument("Figi", originalInstrument.Figi);
-            _apiFactory.Api<IInstrumentsApi>().DeleteInstrument("Figi", newInstrument.Figi);
+            try
+            {
+                _apiFactory.Api<IInstrumentsApi>().DeleteInstrument("ClientInternal", originalInstrument.ClientInternal);
+                _apiFactory.Api<IInstrumentsApi>().DeleteInstrument("ClientInternal", newInstrument.ClientInternal);
+            }
+            catch (ApiException ex)
+            {
+                if (ex.ErrorCode != (int)HttpStatusCode.NotFound)
+                {
+                    throw;
+                }
+            }
+            
         }
     }
 }

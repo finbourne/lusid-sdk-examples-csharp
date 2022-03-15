@@ -6,6 +6,7 @@ using NUnit.Framework;
 
 namespace Lusid.Sdk.Examples.Utilities
 {
+    [Parallelizable(ParallelScope.All)]
     public abstract class DemoInstrumentBase: TutorialBase
     {
         /// <summary>
