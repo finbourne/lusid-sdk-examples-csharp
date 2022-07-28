@@ -2,16 +2,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Lusid.Sdk.Api;
-using Lusid.Sdk.Examples.Utilities;
 using Lusid.Sdk.Model;
+using Lusid.Sdk.Examples.Utilities;
 using LusidFeatures;
 using NUnit.Framework;
 
-namespace Lusid.Sdk.Examples.Instruments
+namespace Lusid.Sdk.Examples.Tutorials.Instruments
 {
     [TestFixture]
     public class SimpleInstrumentExample: DemoInstrumentBase
     {
+        /// <inheritdoc />
+        protected override void CreateAndUpsertInstrumentResetsToLusid(string scope, ModelSelection.ModelEnum model, LusidInstrument instrument)
+        {
+            // nothing required.
+        }
+
         [LusidFeature("F5-21")]
         [Test]
         public void SimpleInstrumentCreationAndUpsertionExample()

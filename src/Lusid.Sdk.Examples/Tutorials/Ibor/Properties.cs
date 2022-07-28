@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Lusid.Sdk.Api;
-using Lusid.Sdk.Examples.Utilities;
-using Lusid.Sdk.Model;
-using LusidFeatures;
 using NUnit.Framework;
-using static Lusid.Sdk.Examples.Utilities.PropertyExtensions;
+using Lusid.Sdk.Api;
+using Lusid.Sdk.Model;
+using Lusid.Sdk.Examples.Utilities;
+using Lusid.Sdk.Utilities;
+using LusidFeatures;
 
 namespace Lusid.Sdk.Examples.Ibor
 {
@@ -181,7 +181,7 @@ namespace Lusid.Sdk.Examples.Ibor
             var propertyDefinitionResult = _apiFactory.Api<IPropertyDefinitionsApi>().CreatePropertyDefinition(multiValuePropertyDefinition);
             
             //    Create the property values
-            var propertyValue = CreateLabelSet("PortfolioManager1","PortfolioManager2");
+            var propertyValue = PropertyExtensions.CreateLabelSet("PortfolioManager1","PortfolioManager2");
             
             //    Details of the new portfolio to be created, created here with the minimum set of mandatory fields 
             var createPortfolioRequest = new CreateTransactionPortfolioRequest(
@@ -207,14 +207,14 @@ namespace Lusid.Sdk.Examples.Ibor
                             propertyValue)
                 }
             );
-            Assert.That(propertiesUpsertResult.Properties.Values.Single().Value.LabelValueSet, Is.EqualTo(propertyValue.LabelValueSet).Using(LabelValueSetEquality));
+            Assert.That(propertiesUpsertResult.Properties.Values.Single().Value.LabelValueSet, Is.EqualTo(propertyValue.LabelValueSet).Using(PropertyExtensions.LabelValueSetEquality));
 
             var portfolioProperties = _apiFactory.Api<IPortfoliosApi>().GetPortfolioProperties(TestDataUtilities.TutorialScope, portfolioResult.Id.Code).Properties;
 
             Assert.That(portfolioProperties.Keys, Is.EquivalentTo(new [] { propertyDefinitionResult.Key}));
 
             var returnedProperty = portfolioProperties[propertyDefinitionResult.Key];
-            Assert.That(returnedProperty.Value, Is.EqualTo(propertyValue).Using(PropertyValueEquality));
+            Assert.That(returnedProperty.Value, Is.EqualTo(propertyValue).Using(PropertyExtensions.PropertyValueEquality));
         }
     }
 }

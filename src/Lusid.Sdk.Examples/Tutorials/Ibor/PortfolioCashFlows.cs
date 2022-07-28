@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Lusid.Sdk.Examples.Utilities;
 using Lusid.Sdk.Model;
+using Lusid.Sdk.Examples.Utilities;
+using Lusid.Sdk.Utilities;
 using NUnit.Framework;
 
-namespace Lusid.Sdk.Examples.Ibor
+namespace Lusid.Sdk.Examples.Tutorials.Ibor
 {
     [TestFixture]
     public class PortfolioCashFlows: TutorialBase
@@ -139,7 +140,7 @@ namespace Lusid.Sdk.Examples.Ibor
             Assert.That(amountsPositive, Is.True);
             
             // GIVEN the cashflow transactions, we create from them transaction requests and upsert them.
-            var upsertCashFlowTransactions = PopulateCashFlowTransactionWithUniqueIds(cashFlows.Values, bond.DomCcy);
+            var upsertCashFlowTransactions = PopulateCashFlowTransactionWithUniqueIds(cashFlows.Values);
             _transactionPortfoliosApi.UpsertTransactions(_portfolioScope, _portfolioCode, MapToCashFlowTransactionRequest(upsertCashFlowTransactions));
 
             var expectedPortfolioTransactions = _transactionPortfoliosApi.GetTransactions(
@@ -213,7 +214,7 @@ namespace Lusid.Sdk.Examples.Ibor
             Assert.That(currencyAndAmounts, Is.EquivalentTo(expectedCashFlows)); 
             
             // GIVEN the cashflow transactions, we create from them transaction requests and upsert them.
-            var upsertCashFlowTransactions = PopulateCashFlowTransactionWithUniqueIds(cashFlows.Values, fxForward.DomCcy);
+            var upsertCashFlowTransactions = PopulateCashFlowTransactionWithUniqueIds(cashFlows.Values);
             _transactionPortfoliosApi.UpsertTransactions(_portfolioScope, _portfolioCode, MapToCashFlowTransactionRequest(upsertCashFlowTransactions));
 
             _recipeApi.DeleteConfigurationRecipe(_portfolioScope, modelRecipeCode);
@@ -242,11 +243,11 @@ namespace Lusid.Sdk.Examples.Ibor
         // Given a transaction, this method creates a TransactionRequest so that it can be upserted back into LUSID.
         // InstrumentUid is additionally added to identify where the cashflow came from. The transaction ID needs to
         // be unique.
-        internal static IEnumerable<Transaction> PopulateCashFlowTransactionWithUniqueIds(IEnumerable<Transaction> transactions, string cashFlowCurrency)
+        internal static IEnumerable<Transaction> PopulateCashFlowTransactionWithUniqueIds(IEnumerable<Transaction> transactions)
         {
             foreach (var transaction in transactions)
             {
-                transaction.InstrumentIdentifiers.Add("Instrument/default/Currency", cashFlowCurrency);
+                transaction.InstrumentIdentifiers.Add("Instrument/default/Currency", transaction.TransactionCurrency);
             }
             
             return transactions.Select((transaction , i) => new Transaction(

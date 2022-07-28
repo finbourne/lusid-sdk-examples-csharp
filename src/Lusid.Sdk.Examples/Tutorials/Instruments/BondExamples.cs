@@ -1,18 +1,24 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Lusid.Sdk.Examples.Utilities;
 using Lusid.Sdk.Model;
+using Lusid.Sdk.Examples.Utilities;
 using LusidFeatures;
 using NUnit.Framework;
 
-namespace Lusid.Sdk.Examples.Instruments
+namespace Lusid.Sdk.Examples.Tutorials.Instruments
 {
     [TestFixture]
     public class BondExamples: DemoInstrumentBase
     {
         private static bool IsZeroCouponBond(Bond bond) => bond.FlowConventions.PaymentFrequency == "0Invalid";
-        
+
+        /// <inheritdoc />
+        protected override void CreateAndUpsertInstrumentResetsToLusid(string scope, ModelSelection.ModelEnum model, LusidInstrument instrument)
+        {
+            // nothing required.
+        }
+
         /// <inheritdoc />
         protected override void CreateAndUpsertMarketDataToLusid(string scope, ModelSelection.ModelEnum model, LusidInstrument bond)
         {
@@ -20,7 +26,7 @@ namespace Lusid.Sdk.Examples.Instruments
             {
                 var upsertComplexMarketDataRequest = new Dictionary<string, UpsertComplexMarketDataRequest>
                 {
-                    {"discountCurve", TestDataUtilities.BuildOisCurveRequest(TestDataUtilities.EffectiveAt, "USD")}
+                    {"discountCurve", TestDataUtilities.BuildRateCurveRequest(TestDataUtilities.EffectiveAt, "USD", "OIS", TestDataUtilities.ExampleDiscountFactors1)}
                 };
                 var upsertComplexMarketDataResponse = _complexMarketDataApi.UpsertComplexMarketData(scope, upsertComplexMarketDataRequest);
                 ValidateComplexMarketDataUpsert(upsertComplexMarketDataResponse, upsertComplexMarketDataRequest.Count);
@@ -50,7 +56,7 @@ namespace Lusid.Sdk.Examples.Instruments
             // In case of a zero coupon bond, we expect only a single payment at the bond maturity.
             // Otherwise, we expect regular payments (=cashflows) depending on the bond face value and
             // coupon rate.
-            Assert.That(cashflows.Count, Is.EqualTo(IsZeroCouponBond(bond) ? 1 : 3));
+            Assert.That(cashflows.Count, Is.EqualTo(IsZeroCouponBond(bond) ? 1 : 13));
             // We perform here a very simple check that a bond cashflow must be positive.
             var allCashFlowsPositive = cashflows.All(cf => cf.Amount > 0);
             Assert.That(allCashFlowsPositive, Is.True);
@@ -73,9 +79,9 @@ namespace Lusid.Sdk.Examples.Instruments
             
             var upsertResponse = _instrumentsApi.UpsertInstruments(definitions);
             ValidateUpsertInstrumentResponse(upsertResponse);
-
+            
             // CAN NOW QUERY FROM LUSID
-            var getResponse = _instrumentsApi.GetInstruments("ClientInternal", new List<string> { uniqueId });
+            var getResponse = _instrumentsApi.GetInstruments("ClientInternal", new List<string> { uniqueId }, asAt: upsertResponse.Values.First().Value.Version.AsAtDate);
             ValidateInstrumentResponse(getResponse, uniqueId);
             
             var retrieved = getResponse.Values.First().Value.InstrumentDefinition;
@@ -138,7 +144,7 @@ namespace Lusid.Sdk.Examples.Instruments
             ValidateUpsertInstrumentResponse(upsertResponse);
 
             // CAN NOW QUERY FROM LUSID
-            var getResponse = _instrumentsApi.GetInstruments("ClientInternal", new List<string> { uniqueId });
+            var getResponse = _instrumentsApi.GetInstruments("ClientInternal", new List<string> { uniqueId }, upsertResponse.Values.First().Value.Version.AsAtDate);
             ValidateInstrumentResponse(getResponse, uniqueId);
             
             var retrieved = getResponse.Values.First().Value.InstrumentDefinition;

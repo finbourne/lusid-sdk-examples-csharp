@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using Lusid.Sdk.Api;
 using Lusid.Sdk.Client;
-using Lusid.Sdk.Examples.Utilities;
 using Lusid.Sdk.Model;
+using Lusid.Sdk.Examples.Utilities;
+using Lusid.Sdk.Utilities;
 using LusidFeatures;
 using NUnit.Framework;
 
-namespace Lusid.Sdk.Examples.Ibor
+namespace Lusid.Sdk.Examples.Tutorials.Ibor
 {
     [TestFixture]
     public class Transactions: TutorialBase
@@ -57,24 +58,24 @@ namespace Lusid.Sdk.Examples.Ibor
             Assert.That(transactions.Values, Has.Count.EqualTo(1));
             Assert.That(transactions.Values[0].TransactionId, Is.EqualTo(transaction.TransactionId));
         }
-        
+
         [LusidFeature("F18")]
         [Test]
         public void Load_Cash_Transaction()
         {
             var effectiveDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
-            
+
             //    create the transaction request
             var transaction = new TransactionRequest(
-                
+
                 //    unique transaction id
                 transactionId: Guid.NewGuid().ToString(),
-                
+
                 instrumentIdentifiers: new Dictionary<string, string>
                 {
                     [TestDataUtilities.LusidCashIdentifier] = "GBP"
                 },
-                
+
                 type: "FundsIn",
                 totalConsideration: new CurrencyAndAmount(0.0M, "GBP"),
                 transactionPrice: new TransactionPrice(0.0M),
@@ -82,17 +83,19 @@ namespace Lusid.Sdk.Examples.Ibor
                 settlementDate: effectiveDate,
                 units: 100,
                 source: "Custodian");
-            
+
             //    add the transaction
-            _transactionPortfoliosApi.UpsertTransactions(TestDataUtilities.TutorialScope, _portfolioCode, new List<TransactionRequest> {transaction});
-            
+            _transactionPortfoliosApi.UpsertTransactions(TestDataUtilities.TutorialScope, _portfolioCode,
+                new List<TransactionRequest> { transaction });
+
             //    get the transaction
-            var transactions = _transactionPortfoliosApi.GetTransactions(TestDataUtilities.TutorialScope, _portfolioCode);
-            
+            var transactions =
+                _transactionPortfoliosApi.GetTransactions(TestDataUtilities.TutorialScope, _portfolioCode);
+
             Assert.That(transactions.Values, Has.Count.EqualTo(1));
             Assert.That(transactions.Values[0].TransactionId, Is.EqualTo(transaction.TransactionId));
         }
-        
+
         [LusidFeature("F31")]
         [Test]
         public void Cancel_Transactions()

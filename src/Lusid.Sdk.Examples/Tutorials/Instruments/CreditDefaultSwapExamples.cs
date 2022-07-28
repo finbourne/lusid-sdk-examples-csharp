@@ -2,30 +2,28 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Lusid.Sdk.Examples.Utilities;
 using Lusid.Sdk.Model;
+using Lusid.Sdk.Examples.Utilities;
 using LusidFeatures;
 using NUnit.Framework;
 
-namespace Lusid.Sdk.Examples.Instruments
+namespace Lusid.Sdk.Examples.Tutorials.Instruments
 {
     [TestFixture]
     public class CreditDefaultSwapExamples: DemoInstrumentBase
     {
         /// <inheritdoc />
+        protected override void CreateAndUpsertInstrumentResetsToLusid(string scope, ModelSelection.ModelEnum model, LusidInstrument instrument)
+        {
+            // nothing required.
+        }
+
+        /// <inheritdoc />
         protected override void CreateAndUpsertMarketDataToLusid(string scope, ModelSelection.ModelEnum model, LusidInstrument instrument)
         {
             // POPULATE with required market data for valuation of the instruments
             CreditDefaultSwap cds = (CreditDefaultSwap) instrument;
-            var upsertFxRateRequestReq = TestDataUtilities.BuildFxRateRequest(TestDataUtilities.EffectiveAt);
-            var upsertFxQuoteResponse = _quotesApi.UpsertQuotes(scope, upsertFxRateRequestReq);
-            ValidateQuoteUpsert(upsertFxQuoteResponse, upsertFxRateRequestReq.Count);
-
-            var upsertQuoteRequests = TestDataUtilities.BuildResetQuotesRequest(TestDataUtilities.EffectiveAt.AddDays(-4));
-            var upsertQuoteResponse = _quotesApi.UpsertQuotes(scope, upsertQuoteRequests);
-            Assert.That(upsertQuoteResponse.Failed.Count, Is.EqualTo(0));
-            Assert.That(upsertQuoteResponse.Values.Count, Is.EqualTo(upsertQuoteRequests.Count));
-            
+          
             // CREATE a dictionary of complex market data to be upserted for the CDS. We always need a CDS spread curve.
             var cdsSpreadCurveUpsertRequest = TestDataUtilities.BuildCdsSpreadCurvesUpsertRequest(
                 TestDataUtilities.EffectiveAt,
@@ -42,10 +40,8 @@ namespace Lusid.Sdk.Examples.Instruments
             // For models that is not ConstantTimeValueOfMoney, we require discount curves. We add them to the market data upsert.
             if (model != ModelSelection.ModelEnum.ConstantTimeValueOfMoney)
             {
-                foreach (var kv in TestDataUtilities.BuildRateCurvesRequests(TestDataUtilities.EffectiveAt))
-                {
-                    upsertComplexMarketDataRequest.Add(kv.Key, kv.Value);
-                }
+                upsertComplexMarketDataRequest.Add("discount_curve_USD", TestDataUtilities.BuildRateCurveRequest(TestDataUtilities.EffectiveAt, "USD", "OIS", TestDataUtilities.ExampleDiscountFactors1));
+                upsertComplexMarketDataRequest.Add("projection_curve_USD", TestDataUtilities.BuildRateCurveRequest(TestDataUtilities.EffectiveAt, "USD", "LIBOR", TestDataUtilities.ExampleDiscountFactors2, "6M"));
             }
 
             var upsertComplexMarketDataResponse = _complexMarketDataApi.UpsertComplexMarketData(scope, upsertComplexMarketDataRequest);
@@ -57,27 +53,27 @@ namespace Lusid.Sdk.Examples.Instruments
         {
             CreditDefaultSwap cds = (CreditDefaultSwap) instrument;
             var maturity = cds.MaturityDate;
-            ResourceListOfInstrumentCashFlow cashFlowsAtMaturity = _transactionPortfoliosApi.GetPortfolioCashFlows(
+            var start = cds.StartDate;
+            ResourceListOfInstrumentCashFlow cashFlowsDuringCDS = _transactionPortfoliosApi.GetPortfolioCashFlows(
                 scope,
                 portfolioCode,
-                maturity.AddMilliseconds(-1),
-                maturity.AddMilliseconds(-1),
-                maturity.AddMilliseconds(1),
+                maturity,
+                start.AddYears(-5),
+                maturity.AddYears(10),
                 null,
                 null,
                 scope,
                 recipeCode);
             
-            var cashFlows = cashFlowsAtMaturity.Values.Select(cf => cf)
+            var cashFlows = cashFlowsDuringCDS.Values.Select(cf => cf)
                 .Select(cf => (cf.PaymentDate, cf.Amount, cf.Currency))
                 .ToList();
             var allCashFlowsPositive = cashFlows.All(cf => cf.Amount > 0);
             Assert.That(allCashFlowsPositive, Is.True);
 
-            // CHECK correct number of CDS premium leg cash flows at maturity: If CDS reaches maturity (that would be if no default event is triggered) there is 1 expected cash flow,
-            // which is the last coupon payment of the premium leg.
-            var expectedNumberOfCouponCashFlows = 1;
-            var couponCashFlows = cashFlowsAtMaturity.Values
+            // CHECK correct number of CDS premium leg cash flows: If CDS reaches maturity (that would be if no default event is triggered) there are 22 expected cash flows,
+            var expectedNumberOfCouponCashFlows = 22;
+            var couponCashFlows = cashFlowsDuringCDS.Values
                 .Where(cf => cf.Diagnostics["CashFlowType"] == "Premium")
                 .ToList();
 
@@ -130,7 +126,7 @@ namespace Lusid.Sdk.Examples.Instruments
             ValidateUpsertInstrumentResponse(upsertResponse);
 
             // CAN NOW QUERY FROM LUSID
-            GetInstrumentsResponse getResponse = _instrumentsApi.GetInstruments("ClientInternal", new List<string> { uniqueId });
+            GetInstrumentsResponse getResponse = _instrumentsApi.GetInstruments("ClientInternal", new List<string> { uniqueId }, upsertResponse.Values.First().Value.Version.AsAtDate);
             ValidateInstrumentResponse(getResponse, uniqueId);
             
             var retrieved = getResponse.Values.First().Value.InstrumentDefinition;
@@ -221,8 +217,8 @@ namespace Lusid.Sdk.Examples.Instruments
             // CREATE the required market data, in this case a credit curve and a yield curve
             // The IsdaYieldCurve for a currency can be sourced from the daily set published by ISDA
             // The credit spreads can be sourced from an appropriate market data provider or internal marks
-            string ycXml = File.ReadAllText($"{TestDataUtilities.ExampleMarketDataDirectory}/IsdaYieldCurve_USD_20200605.xml");
-            var ycOpaque = new OpaqueMarketData(ycXml, "xml", "Example isda yield curve", ComplexMarketData.MarketDataTypeEnum.OpaqueMarketData);
+            string ycXml = File.ReadAllText("../../../Tutorials/Ibor/ExampleMarketData/IsdaYieldCurve_USD_20200605.xml");
+            var ycOpaque = new OpaqueMarketData(ycXml, "xml", "Example isda yield curve", marketDataType: ComplexMarketData.MarketDataTypeEnum.OpaqueMarketData);
             var upsertYcId = new ComplexMarketDataId("Lusid", effectiveAt: testNow, marketAsset: "IsdaYieldCurve/USD");
             var ccData = new CreditSpreadCurveData(
                 baseDate: testNow,
@@ -268,10 +264,6 @@ namespace Lusid.Sdk.Examples.Instruments
             // CHECK that the valuation was performed
             Assert.That(result.Data, Is.Not.Empty);
             Assert.That(result.AggregationFailures, Is.Empty);
-            foreach (var val in result.Data)
-            {
-                Console.WriteLine(val.GetValueOrDefault(pvKey));
-            }
         }
     }
 }

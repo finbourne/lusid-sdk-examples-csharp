@@ -1,28 +1,38 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Lusid.Sdk.Examples.Ibor;
-using Lusid.Sdk.Examples.Utilities;
 using Lusid.Sdk.Model;
+using Lusid.Sdk.Examples.Tutorials.Ibor;
+using Lusid.Sdk.Examples.Utilities;
 using LusidFeatures;
 using NUnit.Framework;
 
-namespace Lusid.Sdk.Examples.Instruments
+namespace Lusid.Sdk.Examples.Tutorials.Instruments
 {
     [TestFixture]
-    public class FxFowardExamples: DemoInstrumentBase
+    public class FxForwardExamples: DemoInstrumentBase
     {
+        /// <inheritdoc />
+        protected override void CreateAndUpsertInstrumentResetsToLusid(string scope, ModelSelection.ModelEnum model, LusidInstrument instrument)
+        {
+            // nothing required.
+        }
+
         /// <inheritdoc />
         protected override void CreateAndUpsertMarketDataToLusid(string scope, ModelSelection.ModelEnum model, LusidInstrument instrument)
         {
             // POPULATE with required market data for valuation of the instruments
-            var upsertFxRateRequestReq = TestDataUtilities.BuildFxRateRequest(TestDataUtilities.EffectiveAt);
+            var upsertFxRateRequestReq = TestDataUtilities.BuildFxRateRequest("USD", "JPY", 150, TestDataUtilities.EffectiveAt, TestDataUtilities.EffectiveAt);
             var upsertQuoteResponse = _quotesApi.UpsertQuotes(scope, upsertFxRateRequestReq);
             ValidateQuoteUpsert(upsertQuoteResponse, upsertFxRateRequestReq.Count);
 
             if (model == ModelSelection.ModelEnum.Discounting)
             {
-                var upsertComplexMarketDataRequest =  TestDataUtilities.BuildRateCurvesRequests(TestDataUtilities.EffectiveAt);
+                Dictionary<string, UpsertComplexMarketDataRequest> upsertComplexMarketDataRequest =
+                    new Dictionary<string, UpsertComplexMarketDataRequest>(); 
+                upsertComplexMarketDataRequest.Add("discount_curve_USD", TestDataUtilities.BuildRateCurveRequest(TestDataUtilities.EffectiveAt, "USD", "OIS", TestDataUtilities.ExampleDiscountFactors1));
+                upsertComplexMarketDataRequest.Add("discount_curve_JPY", TestDataUtilities.BuildRateCurveRequest(TestDataUtilities.EffectiveAt, "JPY", "OIS", TestDataUtilities.ExampleDiscountFactors1));
+
                 var upsertComplexMarketDataResponse = _complexMarketDataApi.UpsertComplexMarketData(scope, upsertComplexMarketDataRequest);
                 ValidateComplexMarketDataUpsert(upsertComplexMarketDataResponse, upsertComplexMarketDataRequest.Count);
             }
@@ -65,7 +75,7 @@ namespace Lusid.Sdk.Examples.Instruments
             ValidateUpsertInstrumentResponse(upsertResponse);
 
             // CAN NOW QUERY FROM LUSID
-            GetInstrumentsResponse getResponse = _instrumentsApi.GetInstruments("ClientInternal", new List<string> { uniqueId });
+            GetInstrumentsResponse getResponse = _instrumentsApi.GetInstruments("ClientInternal", new List<string> { uniqueId }, upsertResponse.Values.First().Value.Version.AsAtDate);
             ValidateInstrumentResponse(getResponse ,uniqueId);
             
             // CHECK contents
@@ -137,11 +147,7 @@ namespace Lusid.Sdk.Examples.Instruments
             var (instrumentID, portfolioCode) = CreatePortfolioAndInstrument(scope, fxForward);
             
             // UPSERT FX Forward to portfolio and populating stores with required market data - use a constant FX rate USD/JPY = 150.
-            var effectiveAt = windowStart;
-            var upsertFxRateRequestReq = TestDataUtilities.BuildFxRateRequest(
-                effectiveFrom: windowStart,
-                effectiveAt: windowEnd,
-                useConstantFxRate: true);
+            var upsertFxRateRequestReq = TestDataUtilities.BuildFxRateRequest("USD", "JPY", 150, windowStart, windowEnd, true);
             
             var upsertQuoteResponse = _quotesApi.UpsertQuotes(scope, upsertFxRateRequestReq);
             ValidateQuoteUpsert(upsertQuoteResponse, upsertFxRateRequestReq.Count);
@@ -153,7 +159,7 @@ namespace Lusid.Sdk.Examples.Instruments
             var allFxFwdCashFlows = _transactionPortfoliosApi.GetUpsertablePortfolioCashFlows(
                     scope,
                     portfolioCode,
-                    effectiveAt,
+                    TestDataUtilities.EffectiveAt,
                     windowStart,
                     windowEnd,
                     null,
@@ -188,7 +194,7 @@ namespace Lusid.Sdk.Examples.Instruments
                 fxForward.MaturityDate);
 
             // UPSERT the cashflows back into LUSID. We first populate the cashflow transactions with unique IDs.
-            var upsertCashFlowTransactions = PortfolioCashFlows.PopulateCashFlowTransactionWithUniqueIds(allFxFwdCashFlows, fxForward.DomCcy);
+            var upsertCashFlowTransactions = PortfolioCashFlows.PopulateCashFlowTransactionWithUniqueIds(allFxFwdCashFlows);
             _transactionPortfoliosApi.UpsertTransactions(scope, portfolioCode, PortfolioCashFlows.MapToCashFlowTransactionRequest(upsertCashFlowTransactions));
             
             // HAVING upserted cashflow into lusid, we call GetValuation again.
