@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Lusid.Sdk.Model;
-using Lusid.Sdk.Tests.tutorials.Ibor;
-using Lusid.Sdk.Tests.Utilities;
+using Lusid.Sdk.Examples.tutorials.Ibor;
+using Lusid.Sdk.Examples.Utilities;
 using LusidFeatures;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
-namespace Lusid.Sdk.Tests.Tutorials.Instruments
+namespace Lusid.Sdk.Examples.Tutorials.Instruments
 {
     [TestFixture]
     public class FxOptionExamples: DemoInstrumentBase

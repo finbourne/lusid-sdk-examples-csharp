@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Lusid.Sdk.Model;
-using Lusid.Sdk.Tests.Utilities;
+using Lusid.Sdk.Examples.Utilities;
 using Lusid.Sdk.Utilities;
 using LusidFeatures;
 using NUnit.Framework;
 
-namespace Lusid.Sdk.Tests.Tutorials.MarketData
+namespace Lusid.Sdk.Examples.Tutorials.MarketData
 {
     public class MarketDataRules : TutorialBase
     {

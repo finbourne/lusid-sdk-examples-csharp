@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using Lusid.Sdk.Model;
-using Lusid.Sdk.Tests.Utilities;
+using Lusid.Sdk.Examples.Utilities;
 using Lusid.Sdk.Utilities;
 using NUnit.Framework;
 
-namespace Lusid.Sdk.Tests.Tutorials.Instruments
+namespace Lusid.Sdk.Examples.Tutorials.Instruments
 {
     public class InstrumentData: TutorialBase
     {

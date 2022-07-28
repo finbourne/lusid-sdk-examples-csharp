@@ -5,13 +5,13 @@ using System.Linq;
 using Lusid.Sdk.Api;
 using Lusid.Sdk.Client;
 using Lusid.Sdk.Model;
-using Lusid.Sdk.Tests.Utilities;
+using Lusid.Sdk.Examples.Utilities;
 using Lusid.Sdk.Utilities;
 using LusidFeatures;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
 
-namespace Lusid.Sdk.Tests.Tutorials.Ibor
+namespace Lusid.Sdk.Examples.Tutorials.Ibor
 {
     [TestFixture]
     public class GenericReconciliation : TutorialBase

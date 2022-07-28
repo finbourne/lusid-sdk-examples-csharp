@@ -9,7 +9,7 @@ using Lusid.Sdk.Utilities;
 using LusidFeatures;
 using NUnit.Framework;
 
-namespace Lusid.Sdk.Tests.Tutorials.Ibor
+namespace Lusid.Sdk.Examples.Tutorials.Ibor
 {
     /// <summary>
     /// Orders represent an instruction from an investor to buy or sell a quantity of a specific

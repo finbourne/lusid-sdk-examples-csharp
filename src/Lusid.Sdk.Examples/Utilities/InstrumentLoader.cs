@@ -6,7 +6,7 @@ using Lusid.Sdk.Model;
 using Lusid.Sdk.Utilities;
 using NUnit.Framework;
 
-namespace Lusid.Sdk.Tests
+namespace Lusid.Sdk.Examples
 {
     public class InstrumentLoader
     {

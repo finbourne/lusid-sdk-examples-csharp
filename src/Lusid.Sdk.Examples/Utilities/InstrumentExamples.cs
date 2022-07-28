@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using Lusid.Sdk.Model;
 
-namespace Lusid.Sdk.Tests.Utilities
+namespace Lusid.Sdk.Examples.Utilities
 {
     public static class InstrumentExamples
     {

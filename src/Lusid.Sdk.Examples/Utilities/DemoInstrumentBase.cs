@@ -5,7 +5,7 @@ using Lusid.Sdk.Model;
 using Lusid.Sdk.Utilities;
 using NUnit.Framework;
 
-namespace Lusid.Sdk.Tests.Utilities
+namespace Lusid.Sdk.Examples.Utilities
 {
     public abstract class DemoInstrumentBase: TutorialBase
     {

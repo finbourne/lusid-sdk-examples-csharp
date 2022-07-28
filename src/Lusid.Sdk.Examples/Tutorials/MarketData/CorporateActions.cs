@@ -5,12 +5,12 @@ using System.Text.Json;
 using Lusid.Sdk.Api;
 using Lusid.Sdk.Client;
 using Lusid.Sdk.Model;
-using Lusid.Sdk.Tests.Utilities;
+using Lusid.Sdk.Examples.Utilities;
 using Lusid.Sdk.Utilities;
 using LusidFeatures;
 using NUnit.Framework;
 
-namespace Lusid.Sdk.Tests.Tutorials.MarketData
+namespace Lusid.Sdk.Examples.Tutorials.MarketData
 {
     [TestFixture]
     public class CorporateActions : TutorialBase

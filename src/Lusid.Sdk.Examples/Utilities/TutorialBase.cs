@@ -4,7 +4,7 @@ using System.Linq;
 using Castle.Core.Internal;
 using Lusid.Sdk.Api;
 using Lusid.Sdk.Model;
-using Lusid.Sdk.Tests.Utilities;
+using Lusid.Sdk.Examples.Utilities;
 using NUnit.Framework;
 
 namespace Lusid.Sdk.Utilities

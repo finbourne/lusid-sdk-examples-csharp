@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Lusid.Sdk.Utilities;
 
-namespace Lusid.Sdk.Tests.Utilities
+namespace Lusid.Sdk.Examples.Utilities
 {
     public class TestLusidApiFactoryBuilder
     {

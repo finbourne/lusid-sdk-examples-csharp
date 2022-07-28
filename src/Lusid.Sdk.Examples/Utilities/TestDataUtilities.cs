@@ -7,7 +7,7 @@ using Lusid.Sdk.Model;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
-namespace Lusid.Sdk.Tests.Utilities
+namespace Lusid.Sdk.Examples.Utilities
 {
     public static class TestDataUtilities
     {

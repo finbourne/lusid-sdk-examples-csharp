@@ -7,12 +7,12 @@ using System.Threading;
 using Lusid.Sdk.Api;
 using Lusid.Sdk.Client;
 using Lusid.Sdk.Model;
-using Lusid.Sdk.Tests.Utilities;
+using Lusid.Sdk.Examples.Utilities;
 using Lusid.Sdk.Utilities;
 using LusidFeatures;
 
 
-namespace Lusid.Sdk.Tests.tutorials.Ibor
+namespace Lusid.Sdk.Examples.tutorials.Ibor
 {
     public class StructuredResultStore : TutorialBase
     {

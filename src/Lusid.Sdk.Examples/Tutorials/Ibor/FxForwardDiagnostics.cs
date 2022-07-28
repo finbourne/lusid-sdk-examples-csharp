@@ -7,7 +7,7 @@ using Lusid.Sdk.Utilities;
 using LusidFeatures;
 using NUnit.Framework;
 
-namespace Lusid.Sdk.Tests.tutorials.Ibor
+namespace Lusid.Sdk.Examples.tutorials.Ibor
 {
     public class FxForwardDiagnostics
     {
