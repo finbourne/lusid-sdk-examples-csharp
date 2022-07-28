@@ -296,14 +296,14 @@ namespace Lusid.Sdk.Examples.Tutorials.Instruments
             // For the portfolio to contain the cash flows coming from the InterestRateSwap
             // we have to upsert the transactions we obtained from the GetUpsertablePortfolioCashFlows endpoint above.
             // First populate the cashflow transactions with unique IDs.
-            var upsertCashFlowTransactions = tutorials.Ibor.PortfolioCashFlows.PopulateCashFlowTransactionWithUniqueIds(
+            var upsertCashFlowTransactions = Tutorials.Ibor.PortfolioCashFlows.PopulateCashFlowTransactionWithUniqueIds(
                 allInterestRateSwapCashFlows);
 
             // Then UPSERT the cash flows back into LUSID.
             _transactionPortfoliosApi.UpsertTransactions(
                 scope,
                 portfolioCode,
-                tutorials.Ibor.PortfolioCashFlows.MapToCashFlowTransactionRequest(upsertCashFlowTransactions));
+                Tutorials.Ibor.PortfolioCashFlows.MapToCashFlowTransactionRequest(upsertCashFlowTransactions));
 
             // HAVING upserted both cash flow and underlying into LUSID, we call GetValuation again.
             var valuationAfterUpsertingCashFlows = _aggregationApi.GetValuation(valuationRequest);

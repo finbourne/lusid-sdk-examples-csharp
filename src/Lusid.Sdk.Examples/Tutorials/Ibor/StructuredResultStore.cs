@@ -12,7 +12,7 @@ using Lusid.Sdk.Utilities;
 using LusidFeatures;
 
 
-namespace Lusid.Sdk.Examples.tutorials.Ibor
+namespace Lusid.Sdk.Examples.Tutorials.Ibor
 {
     public class StructuredResultStore : TutorialBase
     {

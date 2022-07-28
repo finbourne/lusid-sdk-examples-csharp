@@ -11,7 +11,7 @@ namespace Lusid.Sdk.Examples.Utilities
 {
     public static class TestDataUtilities
     {
-        private static readonly string ExampleMarketDataDirectory = "../../../tutorials/Ibor/ExampleMarketData/";
+        private static readonly string ExampleMarketDataDirectory = "../../../Tutorials/Ibor/ExampleMarketData/";
         public const string TutorialScope = "Testdemo";
         public const string MarketDataScope = "FinbourneMarketData";
         public static string ValuationDateKey = "Analytic/default/ValuationDate";

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Lusid.Sdk.Model;
-using Lusid.Sdk.Examples.tutorials.Ibor;
+using Lusid.Sdk.Examples.Tutorials.Ibor;
 using Lusid.Sdk.Examples.Utilities;
 using LusidFeatures;
 using Newtonsoft.Json.Linq;
