@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Lusid.Sdk.Examples.Utilities;
+using Lusid.Sdk.Api;
 using Lusid.Sdk.Model;
+using Lusid.Sdk.Tests.Utilities;
+using Lusid.Sdk.Utilities;
 using LusidFeatures;
 using NUnit.Framework;
 
-namespace Lusid.Sdk.Examples.MarketData
+namespace Lusid.Sdk.Tests.Tutorials.MarketData
 {
     [TestFixture]
     public class Quotes: TutorialBase
@@ -74,8 +76,6 @@ namespace Lusid.Sdk.Examples.MarketData
                 quoteType: QuoteSeriesId.QuoteTypeEnum.Price,
                 field: "mid");
             
-            Console.WriteLine(quoteSeriesId);
-
             //    Get the quotes for each day in the date range
             var quoteResponses = dateRange
                 .Select(d =>
@@ -86,8 +86,6 @@ namespace Lusid.Sdk.Examples.MarketData
                         new Dictionary<string, QuoteSeriesId> {{"correlationId", quoteSeriesId}}))
                 .SelectMany(q => q.Values)
                 .ToList();
-            
-            Console.WriteLine(quoteResponses);
             
             Assert.That(quoteResponses, Has.Count.EqualTo(30));
         }

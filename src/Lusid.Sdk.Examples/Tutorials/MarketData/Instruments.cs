@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using Lusid.Sdk.Api;
 using Lusid.Sdk.Client;
-using Lusid.Sdk.Examples.Utilities;
 using Lusid.Sdk.Model;
+using Lusid.Sdk.Tests.Utilities;
+using Lusid.Sdk.Utilities;
 using LusidFeatures;
 using NUnit.Framework;
 
-namespace Lusid.Sdk.Examples.MarketData
+namespace Lusid.Sdk.Tests.Tutorials.MarketData
 {
     [TestFixture]
     public class Instruments: TutorialBase
@@ -179,12 +180,7 @@ namespace Lusid.Sdk.Examples.MarketData
         {
             //    Get the list of identifier schemes
             ResourceListOfInstrumentIdTypeDescriptor identifiers = _instrumentsApi.GetInstrumentIdentifierTypes();
-
-            //    Schemes are returned as descriptors containing the name, property key and uniqueness constraint
-            foreach (InstrumentIdTypeDescriptor scheme in identifiers.Values)
-            {
-                Console.WriteLine($"name: {scheme.IdentifierType}\nproperty key: {scheme.PropertyKey}\nis unique: {scheme.IsUniqueIdentifierType}\n");
-            }
+            Assert.Greater(identifiers.Values.Count, 0);
         }
         
         [LusidFeature("F24")]

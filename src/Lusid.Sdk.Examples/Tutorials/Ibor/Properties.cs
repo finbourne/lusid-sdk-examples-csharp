@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Lusid.Sdk.Api;
-using Lusid.Sdk.Examples.Utilities;
-using Lusid.Sdk.Model;
-using LusidFeatures;
 using NUnit.Framework;
-using static Lusid.Sdk.Examples.Utilities.PropertyExtensions;
+using Lusid.Sdk.Api;
+using Lusid.Sdk.Model;
+using Lusid.Sdk.Tests.Utilities;
+using Lusid.Sdk.Utilities;
+using LusidFeatures;
+using static Lusid.Sdk.Utilities.PropertyExtensions;
 
-namespace Lusid.Sdk.Examples.Ibor
+namespace Lusid.Sdk.Tests.tutorials.Ibor
 {
     /// <summary>
     /// Set up to create a ILusidApiFactory which is used to make calls to the

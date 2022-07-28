@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Lusid.Sdk.Api;
 using Lusid.Sdk.Model;
+using Lusid.Sdk.Tests.Utilities;
+using Lusid.Sdk.Utilities;
 using LusidFeatures;
 using NUnit.Framework;
-using Lusid.Sdk.Examples.Utilities;
 
-
-namespace Lusid.Sdk.Examples.Ibor
+namespace Lusid.Sdk.Tests.Tutorials.Ibor
 {
     [TestFixture]
     public class Holdings: TutorialBase

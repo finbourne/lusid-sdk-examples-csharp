@@ -1,34 +1,55 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Lusid.Sdk.Examples.Utilities;
 using Lusid.Sdk.Model;
+using Lusid.Sdk.Tests.Utilities;
 using LusidFeatures;
 using NUnit.Framework;
 
-namespace Lusid.Sdk.Examples.Instruments
+namespace Lusid.Sdk.Tests.Tutorials.Instruments
 {
     [TestFixture]
     public class InterestRateSwapWithNamedConventions: DemoInstrumentBase
     {
+        /// <inheritdoc />
+        protected override void CreateAndUpsertInstrumentResetsToLusid(string scope, ModelSelection.ModelEnum model, LusidInstrument instrument)
+        {
+            var quoteRequest = new Dictionary<string, UpsertQuoteRequest>();
+            TestDataUtilities.BuildQuoteRequest(
+                quoteRequest,
+                "UniqueKeyForDictionary",
+                TestDataUtilities.VanillaSwapFixingReference,
+                QuoteSeriesId.InstrumentIdTypeEnum.RIC,
+                0.05m,
+                "InterestRate",
+                TestDataUtilities.ResetDate,
+                QuoteSeriesId.QuoteTypeEnum.Price);
+
+            var upsertResponse = _quotesApi.UpsertQuotes(scope, quoteRequest);
+            Assert.That(upsertResponse.Failed.Count, Is.EqualTo(0));
+            Assert.That(upsertResponse.Values.Count, Is.EqualTo(quoteRequest.Count));
+        }
+
         /// <inheritdoc />
         protected override void CreateAndUpsertMarketDataToLusid(string scope, ModelSelection.ModelEnum model, LusidInstrument instrument)
         {
             // The price of a swap is determined by the price of the fixed leg and floating leg.
             // The price of a floating leg is determined by historic resets rates and projected rates.
             // In this method, we upsert reset rates.
-            // For LUSID to pick up these quotes, we have added a RIC rule to the recipe (see BuildRecipeRequest in TestDataUtilities.cs) 
+            // For LUSID to pick up these quotes, we have added a RIC rule to the recipe (see BuildRecipeRequest in TestDataUtilities.cs)
             // The RIC rule has a large quote interval, this means that we can use one reset quote for all the resets.
-            // For accurate pricing, one would want to upsert a quote per reset. 
-            var quoteRequest = TestDataUtilities.BuildQuoteRequest("USD6M", QuoteSeriesId.InstrumentIdTypeEnum.ClientInternal, 0.05m, "USD", TestDataUtilities.EffectiveAt);
-            var upsertResponse = _quotesApi.UpsertQuotes(scope, quoteRequest);
-            Assert.That(upsertResponse.Failed.Count, Is.EqualTo(0));
-            Assert.That(upsertResponse.Values.Count, Is.EqualTo(quoteRequest.Count));
-            
-            // For models requiring discount curves, we upsert them below. ConstantTimeValueOfMoney does not require any discount curves. 
+            // For accurate pricing, one would want to upsert a quote per reset.
+
+            CreateAndUpsertInstrumentResetsToLusid(scope, model, instrument);
+
+            // For models requiring discount curves, we upsert them below. ConstantTimeValueOfMoney does not require any discount curves.
             if (model != ModelSelection.ModelEnum.ConstantTimeValueOfMoney)
             {
-                var upsertComplexMarketDataRequest = TestDataUtilities.BuildRateCurvesRequests(TestDataUtilities.EffectiveAt);
+                Dictionary<string, UpsertComplexMarketDataRequest> upsertComplexMarketDataRequest =
+                    new Dictionary<string, UpsertComplexMarketDataRequest>();
+                upsertComplexMarketDataRequest.Add("discount_curve_USD", TestDataUtilities.BuildRateCurveRequest(TestDataUtilities.EffectiveAt, "USD", "OIS", TestDataUtilities.ExampleDiscountFactors1));
+                upsertComplexMarketDataRequest.Add("projection_curve_USD", TestDataUtilities.BuildRateCurveRequest(TestDataUtilities.EffectiveAt, "USD", "LIBOR", TestDataUtilities.ExampleDiscountFactors2, "6M"));
+
                 var upsertComplexMarketDataResponse = _complexMarketDataApi.UpsertComplexMarketData(scope, upsertComplexMarketDataRequest);
                 ValidateComplexMarketDataUpsert(upsertComplexMarketDataResponse, upsertComplexMarketDataRequest.Count);
             }
@@ -48,10 +69,10 @@ namespace Lusid.Sdk.Examples.Instruments
                 filter:null,
                 recipeIdScope: scope,
                 recipeIdCode: recipeCode).Values;
-            
+
             Assert.That(cashflows.Count, Is.GreaterThanOrEqualTo(1));
         }
-        
+
         [LusidFeature("F5-22")]
         [Test]
         public void InterestRateSwapWithNamedConventionsCreationAndUpsertionExample()
@@ -63,25 +84,25 @@ namespace Lusid.Sdk.Examples.Instruments
             Assert.That(swap, Is.Not.Null);
 
             // CAN NOW UPSERT TO LUSID
-            var uniqueId = swap.InstrumentType + Guid.NewGuid().ToString(); 
+            var uniqueId = swap.InstrumentType + Guid.NewGuid().ToString();
             var instrumentsIds = new List<(LusidInstrument, string)>{(swap, uniqueId)};
             var definitions = TestDataUtilities.BuildInstrumentUpsertRequest(instrumentsIds);
-            
+
             var upsertResponse = _instrumentsApi.UpsertInstruments(definitions);
             ValidateUpsertInstrumentResponse(upsertResponse);
 
             // CAN NOW QUERY FROM LUSID
-            var getResponse = _instrumentsApi.GetInstruments("ClientInternal", new List<string> { uniqueId });
+            var getResponse = _instrumentsApi.GetInstruments("ClientInternal", new List<string> { uniqueId }, upsertResponse.Values.First().Value.Version.AsAtDate);
             ValidateInstrumentResponse(getResponse, uniqueId);
-            
+
             var retrieved = getResponse.Values.First().Value.InstrumentDefinition;
             Assert.That(retrieved.InstrumentType == LusidInstrument.InstrumentTypeEnum.InterestRateSwap);
             var roundTripSwap = retrieved as InterestRateSwap;
             Assert.That(roundTripSwap, Is.Not.Null);
             Assert.That(roundTripSwap.MaturityDate, Is.EqualTo(swap.MaturityDate));
             Assert.That(roundTripSwap.StartDate, Is.EqualTo(swap.StartDate));
-            Assert.That(roundTripSwap.Legs.Count, Is.EqualTo(swap.Legs.Count));            
-            
+            Assert.That(roundTripSwap.Legs.Count, Is.EqualTo(swap.Legs.Count));
+
             // DELETE instrument
             _instrumentsApi.DeleteInstrument("ClientInternal", uniqueId);
         }
@@ -113,7 +134,7 @@ namespace Lusid.Sdk.Examples.Instruments
                 currency: "USD",
                 paymentTenor: "6M",
                 dayCountConvention: "Actual365",
-                fixingReference: "BP00",
+                fixingReference: TestDataUtilities.VanillaSwapFixingReference,
                 indexName: "LIBOR"
             );
 
@@ -126,7 +147,7 @@ namespace Lusid.Sdk.Examples.Instruments
             Assert.That(indexConventionsResponse, Is.Not.Null);
             Assert.That(indexConventionsResponse.Value, Is.Not.Null);
         }
-        
+
         [LusidFeature("F22-36")]
         [TestCase(ModelSelection.ModelEnum.SimpleStatic)]
         [TestCase(ModelSelection.ModelEnum.ConstantTimeValueOfMoney)]
@@ -137,7 +158,7 @@ namespace Lusid.Sdk.Examples.Instruments
             UpsertNamedConventionsToLusid();
             CallLusidGetValuationEndpoint(irs, model);
         }
-        
+
         [LusidFeature("F22-37")]
         [TestCase(ModelSelection.ModelEnum.ConstantTimeValueOfMoney)]
         [TestCase(ModelSelection.ModelEnum.Discounting)]
@@ -147,13 +168,13 @@ namespace Lusid.Sdk.Examples.Instruments
             UpsertNamedConventionsToLusid();
             CallLusidInlineValuationEndpoint(irs, model);
         }
-        
+
         [LusidFeature("F22-38")]
         [TestCase(ModelSelection.ModelEnum.ConstantTimeValueOfMoney)]
         [TestCase(ModelSelection.ModelEnum.Discounting)]
         public void InterestRateSwaptionPortfolioCashFlowsExample(ModelSelection.ModelEnum model)
         {
-            var irs = InstrumentExamples.CreateExampleInterestRateSwap();
+            var irs = InstrumentExamples.CreateSwapByNamedConventions(TestDataUtilities.StartDate.AddYears(1));
             CallLusidGetPortfolioCashFlowsEndpoint(irs, model);
         }
     }

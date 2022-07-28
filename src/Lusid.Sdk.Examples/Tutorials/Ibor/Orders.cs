@@ -4,12 +4,12 @@ using System.Linq;
 using System.Threading;
 using Lusid.Sdk.Api;
 using Lusid.Sdk.Client;
-using Lusid.Sdk.Examples.Utilities;
 using Lusid.Sdk.Model;
+using Lusid.Sdk.Utilities;
 using LusidFeatures;
 using NUnit.Framework;
 
-namespace Lusid.Sdk.Examples.Ibor
+namespace Lusid.Sdk.Tests.Tutorials.Ibor
 {
     /// <summary>
     /// Orders represent an instruction from an investor to buy or sell a quantity of a specific
@@ -144,7 +144,11 @@ namespace Lusid.Sdk.Examples.Ibor
                             { $"Order/{testScope}/Account", new PerpetualProperty($"Order/{testScope}/Account", new PropertyValue("J Wilson")) },
                             { $"Order/{testScope}/Strategy", new PerpetualProperty($"Order/{testScope}/Strategy", new PropertyValue("RiskArb")) },
                         },
-                        side: "Buy"
+                        
+                        side: "Buy", 
+                        state: "New", 
+                        type: "Limit", 
+                        date: DateTimeOffset.Parse("2022-07-02")
                     )
                 });
 
@@ -193,7 +197,10 @@ namespace Lusid.Sdk.Examples.Ibor
                             { $"Order/{testScope}/Account", new PerpetualProperty($"Order/{testScope}/Account", new PropertyValue("J Wilson")) },
                             { $"Order/{testScope}/Strategy", new PerpetualProperty($"Order/{testScope}/Strategy", new PropertyValue("RiskArb")) },
                         },
-                        side: "Buy"
+                        side: "Buy", 
+                        state: "New", 
+                        type: "Limit", 
+                        date: DateTimeOffset.Parse("2022-07-02")
                     )
                 });
 
@@ -235,7 +242,10 @@ namespace Lusid.Sdk.Examples.Ibor
                         // this reference might disappear, or might become a strict reference to an existing portfolio
                         portfolioId: new ResourceId(testScope, "OrdersTestPortfolio"),
                         properties: new Dictionary<string, PerpetualProperty>(),
-                        side: "Buy"
+                        side: "Buy",
+                        state: "New", 
+                        type: "Limit", 
+                        date: DateTimeOffset.Parse("2022-07-02")
                     )
                 });
 
@@ -275,7 +285,10 @@ namespace Lusid.Sdk.Examples.Ibor
                             { $"Order/{testScope}/Account", new PerpetualProperty($"Order/{testScope}/Account", new PropertyValue("J Wilson")) },
                             { $"Order/{testScope}/Strategy", new PerpetualProperty($"Order/{testScope}/Strategy", new PropertyValue("RiskArb")) },
                         },
-                        side: "Buy"
+                        side: "Buy",
+                        state: "New", 
+                        type: "Limit", 
+                        date: DateTimeOffset.Parse("2022-07-02")
                         )
                 });
             
@@ -331,7 +344,10 @@ namespace Lusid.Sdk.Examples.Ibor
                             { $"Order/{testScope}/Scope", new PerpetualProperty($"Order/{testScope}/Scope", new PropertyValue(orderId1.Scope)) },
                             { $"Order/{testScope}/Code", new PerpetualProperty($"Order/{testScope}/Code", new PropertyValue(orderId1.Code)) },
                         },
-                        side: "Buy"
+                        side: "Buy",
+                        state: "New", 
+                        type: "Limit", 
+                        date: DateTimeOffset.Parse("2022-07-02")
                     ),
                     new OrderRequest(
                         id: orderId2,
@@ -357,7 +373,10 @@ namespace Lusid.Sdk.Examples.Ibor
                             { $"Order/{testScope}/Scope", new PerpetualProperty($"Order/{testScope}/Scope", new PropertyValue(orderId2.Scope)) },
                             { $"Order/{testScope}/Code", new PerpetualProperty($"Order/{testScope}/Code", new PropertyValue(orderId2.Code)) },
                         },
-                        side: "Sell"
+                        side: "Sell",
+                        state: "New", 
+                        type: "Limit", 
+                        date: DateTimeOffset.Parse("2022-07-02")
                     ),
                     new OrderRequest(
                         id: orderId3,
@@ -383,7 +402,10 @@ namespace Lusid.Sdk.Examples.Ibor
                             { $"Order/{testScope}/Scope", new PerpetualProperty($"Order/{testScope}/Scope", new PropertyValue(orderId3.Scope)) },
                             { $"Order/{testScope}/Code", new PerpetualProperty($"Order/{testScope}/Code", new PropertyValue(orderId3.Code)) },
                         },
-                        side: "Buy"
+                        side: "Buy",
+                        state: "New", 
+                        type: "Limit", 
+                        date: DateTimeOffset.Parse("2022-07-02")
                     )
                 });
 

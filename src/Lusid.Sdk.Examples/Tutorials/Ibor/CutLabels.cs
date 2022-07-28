@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using Lusid.Sdk.Api;
 using Lusid.Sdk.Model;
+using Lusid.Sdk.Tests.Utilities;
+using Lusid.Sdk.Utilities;
 using LusidFeatures;
 using NUnit.Framework;
-using Lusid.Sdk.Examples.Utilities;
 
-namespace Lusid.Sdk.Examples.Ibor
+namespace Lusid.Sdk.Tests.tutorials.Ibor
 {
     [TestFixture]
     public class CutLabels: TutorialBase

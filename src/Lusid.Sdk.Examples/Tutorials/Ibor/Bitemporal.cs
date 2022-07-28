@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Threading;
 using Lusid.Sdk.Api;
 using Lusid.Sdk.Model;
+using Lusid.Sdk.Tests.Utilities;
+using Lusid.Sdk.Utilities;
 using LusidFeatures;
 using NUnit.Framework;
-using Lusid.Sdk.Examples.Utilities;
 
-namespace Lusid.Sdk.Examples.Ibor
+namespace Lusid.Sdk.Tests.Tutorials.Ibor
 {
     [TestFixture]
     public class Bitemporal: TutorialBase
@@ -65,38 +66,16 @@ namespace Lusid.Sdk.Examples.Ibor
             var transactions = _apiFactory.Api<ITransactionPortfoliosApi>().GetTransactions(TestDataUtilities.TutorialScope, portfolioRequest.Code, asAt: asAtBatch1);
             
             Assert.That(transactions.Values.Count, Is.EqualTo(3), $"AsAt: {asAtBatch1:o}");
-            Console.WriteLine($"transactions at {asAtBatch1}");
-            PrintTransactions(transactions.Values);
 
             transactions = _apiFactory.Api<ITransactionPortfoliosApi>().GetTransactions(TestDataUtilities.TutorialScope, portfolioRequest.Code, asAt: asAtBatch2);
             
             Assert.That(transactions.Values.Count, Is.EqualTo(4), $"AsAt: {asAtBatch2:o}");
-            Console.WriteLine($"transactions at {asAtBatch2}");
-            PrintTransactions(transactions.Values);
 
             transactions = _apiFactory.Api<ITransactionPortfoliosApi>().GetTransactions(TestDataUtilities.TutorialScope, portfolioRequest.Code, asAt: asAtBatch3);
             
             Assert.That(transactions.Values.Count, Is.EqualTo(5), $"AsAt: {asAtBatch3:o}");
-            Console.WriteLine($"transactions at {asAtBatch3}");
-            PrintTransactions(transactions.Values);
 
             transactions = _apiFactory.Api<ITransactionPortfoliosApi>().GetTransactions(TestDataUtilities.TutorialScope, portfolioRequest.Code);
-            
-            Console.WriteLine($"transactions at {DateTimeOffset.Now}");
-            PrintTransactions(transactions.Values);
-
-            //////
-            //
-            //    local functions
-            void PrintTransactions(IEnumerable<Transaction> tradeList)
-            {
-                foreach (var transaction in tradeList)
-                {
-                    Console.WriteLine($"{transaction.InstrumentUid}\t{transaction.TransactionDate}\t{transaction.Units}\t{transaction.TransactionPrice.Price}\t{transaction.TotalConsideration.Amount}");
-                }
-
-                Console.WriteLine();
-            }
         }
     }
 }

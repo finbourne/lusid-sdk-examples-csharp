@@ -2,21 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Lusid.Sdk.Api;
-using Lusid.Sdk.Examples.Utilities;
 using Lusid.Sdk.Model;
+using Lusid.Sdk.Tests.Utilities;
+using Lusid.Sdk.Utilities;
 using LusidFeatures;
 using NUnit.Framework;
 
-namespace Lusid.Sdk.Examples.Ibor
+namespace Lusid.Sdk.Tests.Tutorials.Ibor
 {
     [TestFixture]
     public class Valuations: TutorialBase
     {
         private InstrumentLoader _instrumentLoader;
         private IList<string> _instrumentIds;
-        
-        private static readonly DateTimeOffset TestEffectiveFrom = new DateTimeOffset(2020, 2, 16, 0, 0, 0, TimeSpan.Zero);
-        private static readonly DateTimeOffset TestEffectiveAt = new DateTimeOffset(2020, 2, 23, 0, 0, 0, TimeSpan.Zero);
+
 
         [OneTimeSetUp]
         public void SetUp()
@@ -24,7 +23,7 @@ namespace Lusid.Sdk.Examples.Ibor
             _instrumentLoader = new InstrumentLoader(_apiFactory);
             _instrumentIds = _instrumentLoader.LoadInstruments();
         }
-        
+
         [LusidFeature("F36")]
         [Test]
         public void Run_Valuation()
@@ -35,7 +34,7 @@ namespace Lusid.Sdk.Examples.Ibor
             var portfolioRequest = TestDataUtilities.BuildTransactionPortfolioRequest();
             var portfolio = _transactionPortfoliosApi.CreatePortfolio(TestDataUtilities.TutorialScope, portfolioRequest);
             Assert.That(portfolio?.Id.Code, Is.EqualTo(portfolioRequest.Code));
-            
+
             var transactionSpecs = new[]
                 {
                     (Id: _instrumentIds[0], Price: 101, TradeDate: effectiveDate),
@@ -101,7 +100,7 @@ namespace Lusid.Sdk.Examples.Ibor
             //    Upload the quote
             _apiFactory.Api<IQuotesApi>().UpsertQuotes(scope, quotes);
 
-            //    Create the valuation request, this example calculates the percentage of total portfolio value and value by instrument 
+            //    Create the valuation request, this example calculates the percentage of total portfolio value and value by instrument
             var valuationRequest = new ValuationRequest(
                 recipeId: new ResourceId(recipeScope, "DataScope_Recipe"),
                 metrics: new List<AggregateSpec>
@@ -135,7 +134,7 @@ namespace Lusid.Sdk.Examples.Ibor
 
             // CREATE inline valuation request asking for instruments PV using a "default" recipe
             var scope = Guid.NewGuid().ToString();
-            var valuationSchedule = new ValuationSchedule(effectiveFrom: TestEffectiveFrom, effectiveAt: TestEffectiveAt);
+            var valuationSchedule = new ValuationSchedule(effectiveFrom: TestDataUtilities.StartDate.AddDays(13), effectiveAt: TestDataUtilities.StartDate.AddDays(20));
             var inlineValuationRequest = new InlineValuationRequest(
                 recipeId: new ResourceId(scope, "default"),
                 metrics: TestDataUtilities.ValuationSpec,
@@ -146,7 +145,7 @@ namespace Lusid.Sdk.Examples.Ibor
             // Values the bond for each day in between 2020-02-16 and 2020-02-23 (inclusive)
             var valuation = _apiFactory.Api<IAggregationApi>().GetValuationOfWeightedInstruments(inlineValuationRequest);
             Assert.That(valuation, Is.Not.Null);
-            // 6 valuation days (Given Sun-Sun (see effectiveFrom|To), rolls forward to Monday and generates schedule, rolling to appropriate GBD) 
+            // 6 valuation days (Given Sun-Sun (see effectiveFrom|To), rolls forward to Monday and generates schedule, rolling to appropriate GBD)
             Assert.That(valuation.Data.Count, Is.EqualTo(6));
 
             // GET the present values of the bond
@@ -160,7 +159,7 @@ namespace Lusid.Sdk.Examples.Ibor
 
             // CHECK pvs are unique as they are valued everyday
             var uniquePvs = presentValues.Distinct().Count();
-            // 6 valuation days (Given Sun-Sun (see effectiveFrom|To), rolls forward to Monday and generates schedule, rolling to appropriate GBD) 
+            // 6 valuation days (Given Sun-Sun (see effectiveFrom|To), rolls forward to Monday and generates schedule, rolling to appropriate GBD)
             Assert.That(uniquePvs, Is.EqualTo(6));
         }
 
@@ -177,15 +176,15 @@ namespace Lusid.Sdk.Examples.Ibor
 
             // POPULATE with required market data for valuation of the instruments
             var scope = Guid.NewGuid().ToString();
-            var upsertFxRateRequestreq = TestDataUtilities.BuildFxRateRequest(TestEffectiveAt);
+            var upsertFxRateRequestreq = TestDataUtilities.BuildFxRateRequest("USD", "JPY", 150, TestDataUtilities.EffectiveAt, TestDataUtilities.EffectiveAt);
             _quotesApi.UpsertQuotes(scope, upsertFxRateRequestreq);
-            
-            // CREATE and upsert recipe for pricing the portfolio of instruments 
+
+            // CREATE and upsert recipe for pricing the portfolio of instruments
             var constantTimeValueOfMoneyRecipeCode = "ConstantTimeValueOfMoneyRecipe";
             CreateAndUpsertRecipe(constantTimeValueOfMoneyRecipeCode, scope, ModelSelection.ModelEnum.ConstantTimeValueOfMoney);
 
             // CREATE inline valuation request asking for the inline instruments' PV
-            var valuationSchedule = new ValuationSchedule(effectiveAt: TestEffectiveAt);
+            var valuationSchedule = new ValuationSchedule(effectiveAt: TestDataUtilities.EffectiveAt);
             var inlineValuationRequest = new InlineValuationRequest(
                 recipeId: new ResourceId(scope, constantTimeValueOfMoneyRecipeCode),
                 metrics: TestDataUtilities.ValuationSpec,
@@ -213,7 +212,7 @@ namespace Lusid.Sdk.Examples.Ibor
         [Test]
         public void TestDemonstratingFxForwardPricingWithDifferentPricingModels()
         {
-            // CREATE and upset two recipe to price Fx-Forward - one by ConstantTimeValueOfMoney and one by Discounting 
+            // CREATE and upset two recipe to price Fx-Forward - one by ConstantTimeValueOfMoney and one by Discounting
             var scope = Guid.NewGuid().ToString();
 
             var discountingRecipeCode = "DiscountingRecipe";
@@ -225,23 +224,28 @@ namespace Lusid.Sdk.Examples.Ibor
             // POPULATE stores with required market data to value Fx-Forward using discounting model
             // Fx rates are upserted for both models
             // Rate curves are upserted for the discounting pricing model
-            var upsertFxRateRequestReq = TestDataUtilities.BuildFxRateRequest(TestEffectiveAt);
-            var upsertQuoteResponse = _quotesApi.UpsertQuotes(scope, upsertFxRateRequestReq);
-            
-            Dictionary<string, UpsertComplexMarketDataRequest> complexMarketUpsertRequests = TestDataUtilities.BuildRateCurvesRequests(TestEffectiveAt);
+            var upsertFxRateRequestReq = TestDataUtilities.BuildFxRateRequest("USD", "JPY", 150, TestDataUtilities.EffectiveAt, TestDataUtilities.EffectiveAt);
+            _quotesApi.UpsertQuotes(scope, upsertFxRateRequestReq);
+
+            Dictionary<string, UpsertComplexMarketDataRequest> complexMarketUpsertRequests =
+                new Dictionary<string, UpsertComplexMarketDataRequest>();
+            complexMarketUpsertRequests.Add("discount_curve_USD", TestDataUtilities.BuildRateCurveRequest(TestDataUtilities.EffectiveAt, "USD", "OIS", TestDataUtilities.ExampleDiscountFactors1));
+            complexMarketUpsertRequests.Add("discount_curve_JPY", TestDataUtilities.BuildRateCurveRequest(TestDataUtilities.EffectiveAt, "JPY", "OIS", TestDataUtilities.ExampleDiscountFactors1));
+            complexMarketUpsertRequests.Add("projection_curve_USD", TestDataUtilities.BuildRateCurveRequest(TestDataUtilities.EffectiveAt, "USD", "LIBOR", TestDataUtilities.ExampleDiscountFactors2, "6M"));
+
             var upsertmarketResponse = _complexMarketDataApi.UpsertComplexMarketData(scope, complexMarketUpsertRequests);
             ValidateComplexMarketDataUpsert(upsertmarketResponse, complexMarketUpsertRequests.Count);
 
-            // CREATE a Fx-Forward as an inline instrument 
+            // CREATE a Fx-Forward as an inline instrument
             var instruments = new List<WeightedInstrument>
             {
                 new WeightedInstrument(100, "fx-forward", InstrumentExamples.CreateExampleFxForward())
             };
 
             // CREATE valuation schedule
-            var valuationSchedule = new ValuationSchedule(effectiveAt: TestEffectiveAt);
+            var valuationSchedule = new ValuationSchedule(effectiveAt: TestDataUtilities.EffectiveAt);
 
-            // CREATE inline valuation request for Simple Static and Discounting pricing model 
+            // CREATE inline valuation request for Simple Static and Discounting pricing model
             var discountingInlineValuationRequest = new InlineValuationRequest(
                 recipeId: new ResourceId(scope, discountingRecipeCode),
                 metrics: TestDataUtilities.ValuationSpec,
@@ -282,13 +286,13 @@ namespace Lusid.Sdk.Examples.Ibor
             var portfolio = _transactionPortfoliosApi.CreatePortfolio(scope, portfolioRequest);
             Assert.That(portfolio?.Id.Code, Is.EqualTo(portfolioRequest.Code));
             LusidInstrument instrument = InstrumentExamples.GetExampleInstrument(instrumentName);
-            
+
             // UPSERT the above instrument to portfolio as well as populating stores with required market data
             AddInstrumentsTransactionPortfolioAndPopulateRequiredMarketData(
-                scope, 
+                scope,
                 portfolioRequest.Code,
-                TestEffectiveAt,
-                TestEffectiveAt,
+                TestDataUtilities.EffectiveAt,
+                TestDataUtilities.EffectiveAt,
                 new List<LusidInstrument> {instrument});
 
             // CREATE and upsert recipe specifying discount pricing model
@@ -300,7 +304,7 @@ namespace Lusid.Sdk.Examples.Ibor
                 scope,
                 portfolioRequest.Code,
                 discountingRecipeCode,
-                TestEffectiveAt);
+                TestDataUtilities.EffectiveAt);
 
             // CALL valuation
             var valuation = _apiFactory.Api<IAggregationApi>().GetValuation(valuationRequest);
@@ -345,14 +349,14 @@ namespace Lusid.Sdk.Examples.Ibor
                 settleDays: 2,
                 resetDays: 2
             );
-            
+
             // CREATE a bond instrument inline
             const decimal principal = 1_000_000m;
             var instruments = new List<WeightedInstrument>
             {
                 new WeightedInstrument(1, "bond", new Bond(
-                    startDate: TestEffectiveAt,
-                    maturityDate: TestEffectiveAt.AddYears(1),
+                    startDate: TestDataUtilities.EffectiveAt,
+                    maturityDate: TestDataUtilities.EffectiveAt.AddYears(1),
                     domCcy: "GBP",
                     principal: principal,
                     couponRate: 0.05m,
@@ -361,7 +365,7 @@ namespace Lusid.Sdk.Examples.Ibor
                     instrumentType: LusidInstrument.InstrumentTypeEnum.Bond
                 ))
             };
-            
+
             // DEFINE the response we want
             const string valuationDateKey = "Analytic/default/ValuationDate";
             const string pvKey = "Holding/default/PV";
@@ -377,7 +381,7 @@ namespace Lusid.Sdk.Examples.Ibor
                 recipeId: new ResourceId(scope, "default"),
                 metrics: valuationSpec,
                 sort: new List<OrderBySpec> {new OrderBySpec(valuationDateKey, OrderBySpec.SortOrderEnum.Ascending)},
-                valuationSchedule: new ValuationSchedule(effectiveAt: TestEffectiveAt),
+                valuationSchedule: new ValuationSchedule(effectiveAt: TestDataUtilities.EffectiveAt),
                 instruments: instruments);
 
             // CALL valuation
@@ -387,11 +391,11 @@ namespace Lusid.Sdk.Examples.Ibor
             // CHECK that the PV makes sense
             Assert.That(presentValue, Is.GreaterThanOrEqualTo(principal));
         }
-        
+
         [Test]
         public void SingleDateValuationOfAnInstrumentPortfolio()
         {
-            // CREATE a portfolio 
+            // CREATE a portfolio
             var portfolioRequest = TestDataUtilities.BuildTransactionPortfolioRequest();
             var portfolio = _transactionPortfoliosApi.CreatePortfolio(TestDataUtilities.TutorialScope, portfolioRequest);
             Assert.That(portfolio?.Id.Code, Is.EqualTo(portfolioRequest.Code));
@@ -401,26 +405,26 @@ namespace Lusid.Sdk.Examples.Ibor
                 InstrumentExamples.CreateExampleFxForward(),
                 InstrumentExamples.CreateExampleBond(),
                 InstrumentExamples.CreateExampleFxOption(),
-                InstrumentExamples.CreateExampleInterestRateSwap()
+                InstrumentExamples.CreateExampleInterestRateSwap(InstrumentExamples.InterestRateSwapType.Vanilla)
             };
-            
+
             // UPSERT the above instrument set to portfolio as well as populating stores with required market data
             AddInstrumentsTransactionPortfolioAndPopulateRequiredMarketData(
                 TestDataUtilities.TutorialScope,
                 portfolioRequest.Code,
-                TestEffectiveAt,
-                TestEffectiveAt,
+                TestDataUtilities.EffectiveAt,
+                TestDataUtilities.EffectiveAt,
                 instruments);
 
             // CREATE and upsert recipe specifying discount pricing model
             var discountingRecipeCode = "DiscountingRecipe";
             CreateAndUpsertRecipe(discountingRecipeCode, TestDataUtilities.TutorialScope, ModelSelection.ModelEnum.Discounting);
-            
+
             var valuationRequest = TestDataUtilities.CreateValuationRequest(
                 TestDataUtilities.TutorialScope,
                 portfolioRequest.Code,
                 discountingRecipeCode,
-                TestEffectiveAt);
+                TestDataUtilities.EffectiveAt);
 
             // CALL valuation
             var valuation = _apiFactory.Api<IAggregationApi>().GetValuation(valuationRequest);
@@ -444,28 +448,28 @@ namespace Lusid.Sdk.Examples.Ibor
         [Test]
         public void MultiDateValuationOfAnInstrumentPortfolio()
         {
-            // CREATE a portfolio 
+            // CREATE a portfolio
             var effectiveDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
             var portfolioRequest = TestDataUtilities.BuildTransactionPortfolioRequest(effectiveDate);
             var portfolio = _transactionPortfoliosApi.CreatePortfolio(TestDataUtilities.TutorialScope, portfolioRequest);
             Assert.That(portfolio?.Id.Code, Is.EqualTo(portfolioRequest.Code));
-            
+
             var instruments = new List<LusidInstrument>
             {
                 InstrumentExamples.CreateExampleBond(),
                 InstrumentExamples.CreateExampleFxOption(),
             };
-            
+
             // Upsert instrument set to portfolio as well as populating stores with required market data
             AddInstrumentsTransactionPortfolioAndPopulateRequiredMarketData(
                 TestDataUtilities.TutorialScope,
                 portfolioRequest.Code,
-                TestEffectiveFrom,
-                TestEffectiveAt,
+                TestDataUtilities.StartDate.AddDays(13),
+                TestDataUtilities.StartDate.AddDays(20),
                 instruments,
                 equityIdentifier: "ABC Corporation");
-            
-            // CREATE and upsert recipe for pricing the portfolio of instruments 
+
+            // CREATE and upsert recipe for pricing the portfolio of instruments
             var constantTimeValueOfMoneyRecipeCode = "ConstantTimeValueOfMoneyRecipe";
             CreateAndUpsertRecipe(constantTimeValueOfMoneyRecipeCode, TestDataUtilities.TutorialScope, ModelSelection.ModelEnum.ConstantTimeValueOfMoney);
 
@@ -474,16 +478,16 @@ namespace Lusid.Sdk.Examples.Ibor
                 TestDataUtilities.TutorialScope,
                 portfolioRequest.Code,
                 constantTimeValueOfMoneyRecipeCode,
-                TestEffectiveAt,
-                TestEffectiveFrom);
-            
+                TestDataUtilities.StartDate.AddDays(20),
+                TestDataUtilities.StartDate.AddDays(13));
+
             // CALL valuation
             var valuation = _apiFactory.Api<IAggregationApi>().GetValuation(valuationRequest);
             Assert.That(valuation, Is.Not.Null);
-            // 6 valuation days (Given Sun-Sun (see effectiveFrom|To), rolls forward to Monday and generates schedule, rolling to appropriate GBD) 
+            // 6 valuation days (Given Sun-Sun (see effectiveFrom|To), rolls forward to Monday and generates schedule, rolling to appropriate GBD)
             // 3 instruments: bond, fx option, equity
             // So 6x3.
-            Assert.That(valuation.Data.Count, Is.EqualTo(18)); 
+            Assert.That(valuation.Data.Count, Is.EqualTo(18));
             TestDataUtilities.CheckPvResultsMakeSense(valuation);
         }
     }
