@@ -32,8 +32,30 @@ jobs:
             exit 1
           fi
       
-      - name: Run tests on MASTER branch
-        if: ${{ github.base_ref == 'master' || github.ref == 'refs/heads/master' }}
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+
+      - name: Build
+        run: |          
+          retries=14
+          found=0
+          while [[ $retries -ge 0 && $found == 0 ]]; do
+              if ! dotnet restore src/Lusid.Sdk.Examples.sln ; then
+                  echo "[ERROR] unable to restore dependencies, attempts remaining: $retries"
+                  sleep 60
+                  ((retries--))
+              else
+                  echo "[INFO] successfully installed dependencies"
+                  found=1
+              fi
+          done
+          if [ $found == 0 ] ; then
+            echo "[ERROR] unable to restore dependencies"
+            exit 1
+          fi
+      
+      - name: Test
+        if: ${{ github.ref == 'refs/heads/master'}}
         env: 
           FBN_TOKEN_URL: ${{ secrets.MASTER_FBN_TOKEN_URL }}
           FBN_USERNAME: ${{ secrets.MASTER_FBN_USERNAME }}
@@ -45,12 +67,10 @@ jobs:
           FBN_ACCESS_TOKEN: ${{ secrets.MASTER_FBN_ACCESS_TOKEN }}
           FBN_LUSID_ACCESS_TOKEN: ${{ secrets.MASTER_FBN_ACCESS_TOKEN }}
         run: | 
-          echo "env variables for MASTER have been set"
-          echo "Changing directory into examples directory"
-          cd src          
-          echo "Running the tests..."
-          docker-compose up --abort-on-container-exit
-          echo "Tests COMPLETED"
+          echo "[INFO] env variables have been set"
+          echo "[INFO] Running the Tests..."
+          dotnet test --configuration Release --verbosity normal src/Lusid.Sdk.Examples.sln
+          echo "[INFO] Build COMPLETED"
 
       - name: Slack notification
         uses: 8398a7/action-slack@v3
