@@ -40,12 +40,15 @@ jobs:
           retries=14
           found=0
           while [[ $retries -ge 0 && $found == 0 ]]; do
-              if ! dotnet restore src/Lusid.Sdk.Examples.sln ; then
+              if ! dotnet restore src/Lusid.Sdk.Examples ; then
                   echo "[ERROR] unable to restore dependencies, attempts remaining: $retries"
                   sleep 60
                   ((retries--))
               else
                   echo "[INFO] successfully installed dependencies"
+                  echo "[INFO] Building the release"
+                  dotnet build --configuration Release --no-restore src/Lusid.Sdk.Examples
+                  echo "[INFO] Build COMPLETED"
                   found=1
               fi
           done
@@ -68,8 +71,9 @@ jobs:
         run: | 
           echo "[INFO] env variables have been set"
           echo "[INFO] Running the Tests..."
-          dotnet test --configuration Release --verbosity normal src/Lusid.Sdk.Examples.sln
-          echo "[INFO] Build COMPLETED"
+          dotnet src/LusidFeatureReporter/bin/Release/netcoreapp3.1/LusidFeatureReporter.dll -a Lusid.Sdk.Examples -n  Lusid.Sdk.Examples -o features.txt
+          dotnet test --configuration Release --verbosity normal src/Lusid.Sdk.Examples
+          echo "[INFO] Tests COMPLETED"
 
       - name: Slack notification
         uses: 8398a7/action-slack@v3
