@@ -801,7 +801,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
         // Demonstrating querying using structured result store with overriden cashflows.
         [LusidFeature("F10-15")]
         [Test]
-        public void TestPortfolioUpsertableQueryWithOverridenCashFlows()
+        public void TestPortfolioCashflowQueryWithSrsOverridenCashFlows()
         {
             // Setting up basic parameters
             var effectiveAt = new DateTimeOffset(2019, 06, 28, 00, 00, 00, TimeSpan.Zero);
@@ -963,14 +963,14 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
            // Expecing a response.Values to contain a list of InstrumentCashflows, of which we expect the following property values.
            // | Amount | Currency | PaymentDate          |
            // | ------ | -------- | -------------------- |
-           // | 100000 | USD      | 28/6/2019 1:00:00 AM |
+           // | 100000 | USD      | 28/6/2019 1:00:00 AM |   <-- This cashflow will not appear as we have strict inequality in favour of the stored view. 
            // | 101000 | USD      | 05/7/2019 1:00:00 AM |
            // | 102000 | USD      | 12/7/2019 1:00:00 AM |
            // | 103000 | USD      | 19/7/2019 1:00:00 AM |
            var responseAmounts = response.Values.Select(x => x.Amount).ToList();
            var responseCurrencies = response.Values.Select(x => x.Currency).ToList();
-           Assert.That(responseAmounts, Is.EquivalentTo(new List<decimal> {100000, 101000, 102000, 103000}));
-           Assert.That(responseCurrencies, Is.EquivalentTo(new List<string> {"USD", "USD", "USD", "USD",}));
+           Assert.That(responseAmounts, Is.EquivalentTo(new List<decimal> {101000, 102000, 103000}));
+           Assert.That(responseCurrencies, Is.EquivalentTo(new List<string> {"USD", "USD", "USD",}));
         }
     }
 }
