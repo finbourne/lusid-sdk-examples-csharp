@@ -1,12 +1,18 @@
-name: Daily build
+# This job runs the project tests
+
+name: Build and test
+
+# Trigger the workflow on push or pull request to master
 
 on:
-  schedule:
-  - cron: "0 4 * * *"
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
 jobs:
   # This workflow contains a single job called "build"
-  build:
+  build-and-test:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -16,8 +22,18 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      - name: Run daily build on MASTER branch
-        if: ${{ github.ref == 'refs/heads/master'}}
+      - name: Set env variable BRANCH_FOR_SLACK for Slack message
+        run: |
+          if ${{ github.event_name == 'push' }} ; then
+            echo "BRANCH_FOR_SLACK=${{ github.ref  }}" >> $GITHUB_ENV
+          elif ${{ github.event_name == 'pull_request' }}; then
+            echo "BRANCH_FOR_SLACK=${{ github.base_ref  }}" >> $GITHUB_ENV
+          else
+            exit 1
+          fi
+      
+      - name: Run tests on MASTER branch
+        if: ${{ github.base_ref == 'master' || github.ref == 'refs/heads/master' }}
         env: 
           FBN_TOKEN_URL: ${{ secrets.MASTER_FBN_TOKEN_URL }}
           FBN_USERNAME: ${{ secrets.MASTER_FBN_USERNAME }}
@@ -30,12 +46,12 @@ jobs:
           FBN_ACCESS_TOKEN: ${{ secrets.MASTER_FBN_ACCESS_TOKEN }}
         run: | 
           echo "env variables for MASTER have been set"
-          echo "Changing directory into src directory"
+          echo "Changing directory into examples directory"
           cd src          
-          echo "Running the build..."
+          echo "Running the tests..."
           docker-compose up --abort-on-container-exit
-          echo "Build COMPLETED"
-    
+          echo "Tests COMPLETED"
+
       - name: Slack notification
         uses: 8398a7/action-slack@v3
         with:
@@ -47,9 +63,9 @@ jobs:
             icon_emoji: ':octocat:',
             attachments: [{
               color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
-              text: `${process.env.AS_WORKFLOW} on ${process.env.AS_REPO}@${process.env.GITHUB_REF} has run in ${process.env.AS_TOOK} with status ${{ job.status }}`
+              text: `${process.env.AS_WORKFLOW} (${process.env.AS_COMMIT}) of ${process.env.AS_REPO}@${process.env.BRANCH_FOR_SLACK} by ${process.env.GITHUB_ACTOR} failed in ${process.env.AS_TOOK}`
             }]
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
-        if: always()
+        if: failure()
