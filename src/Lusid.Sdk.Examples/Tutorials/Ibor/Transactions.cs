@@ -16,17 +16,15 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
     {
         private IList<string> _instrumentIds;
         
-
         [OneTimeSetUp]
         public void OnetimeSetUp()
         {
-
-            
             var instrumentLoader = new InstrumentLoader(_apiFactory);
             _instrumentIds = instrumentLoader.LoadInstruments();
         }
         
         internal string _portfolioCode;
+        
         [SetUp]
         public void SetUp()
         {
@@ -39,7 +37,14 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
         [TearDown]
         public void TearDown()
         {
-            //_portfoliosApi.DeletePortfolio(_portfolioScope, _portfolioCode); 
+            try
+            {
+                _portfoliosApi.DeletePortfolio(TestDataUtilities.TutorialScope, _portfolioCode);
+            }
+            catch (ApiException e)
+            {
+                //  ignore errors in tear down
+            }
         }
         
         [LusidFeature("F17")]
@@ -196,6 +201,38 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
             // assert that the custom properties was upserted with the transaction and is returned
             Assert.IsTrue(transactions.Values[0].Properties.ContainsKey(executingTraderKey));
             Assert.That(transactions.Values[0].Properties[executingTraderKey].Value.LabelValue == executingTraderValue);
+        }
+
+        [Test]
+        public void Handle_Failed_Transaction_Upload()
+        {
+            //    create the transaction request
+            var validTransaction = BuildTransactionRequest();
+            var invalidTransaction = BuildTransactionRequest();
+
+            //  synthesize an invalid transaction request
+            invalidTransaction.InstrumentIdentifiers = new Dictionary<string, string>
+            {
+                ["Invalid"] = "Identifier"
+            };
+
+            //    add the transaction
+            try
+            {
+                _transactionPortfoliosApi.UpsertTransactions(TestDataUtilities.TutorialScope, _portfolioCode,
+                    new List<TransactionRequest> { validTransaction, invalidTransaction });
+            }
+            catch (ApiException e)
+            {
+                var problemDetails = e.ProblemDetails();
+                
+                Assert.That(e.IsValidationProblem, Is.True);
+
+                if (e.TryGetValidationProblemDetails(out var validationProblemDetails))
+                {
+                    Assert.That(validationProblemDetails.Errors, Has.Count.EqualTo(2));
+                }
+            }
         }
 
         private TransactionRequest BuildTransactionRequest()
