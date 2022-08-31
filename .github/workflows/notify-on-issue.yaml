@@ -3,7 +3,7 @@ name: Notifier
 on: [pull_request, issues]
 
 jobs:
-  build:
+  notify-opsgenie:
     runs-on: ubuntu-latest
     steps:
       - name: NotifyOpsGenie
