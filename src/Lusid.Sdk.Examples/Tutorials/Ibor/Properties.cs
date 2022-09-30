@@ -47,7 +47,7 @@ namespace Lusid.Sdk.Examples.Ibor
             );
 
             //    Create the property definition
-            var labelPropertyDefinitionResult = _apiFactory.Api<IPropertyDefinitionsApi>().CreatePropertyDefinition(labelPropertyDefinition);
+            var labelPropertyDefinitionResult = ApiFactory.Api<IPropertyDefinitionsApi>().CreatePropertyDefinition(labelPropertyDefinition);
             
             //    Create the property values
             var labelPropertyValueRequest = new PropertyValue(labelValue: "Active");
@@ -70,11 +70,11 @@ namespace Lusid.Sdk.Examples.Ibor
             );
 
             //    Create the portfolio
-            var portfolioResult = _apiFactory.Api<ITransactionPortfoliosApi>().CreatePortfolio(TestDataUtilities.TutorialScope, createPortfolioRequest);
+            var portfolioResult = ApiFactory.Api<ITransactionPortfoliosApi>().CreatePortfolio(TestDataUtilities.TutorialScope, createPortfolioRequest);
             
             Assert.That(portfolioResult.Id.Code, Is.EqualTo(createPortfolioRequest.Code));
 
-            var portfolioProperties = _apiFactory.Api<IPortfoliosApi>().GetPortfolioProperties(TestDataUtilities.TutorialScope, portfolioResult.Id.Code).Properties;
+            var portfolioProperties = ApiFactory.Api<IPortfoliosApi>().GetPortfolioProperties(TestDataUtilities.TutorialScope, portfolioResult.Id.Code).Properties;
 
             Assert.That(portfolioProperties.Keys, Is.EquivalentTo(new [] { labelPropertyDefinitionResult.Key }));
 
@@ -110,7 +110,7 @@ namespace Lusid.Sdk.Examples.Ibor
             );
             
             //    Create the property definitions
-            var metricPropertyDefinitionResult = _apiFactory.Api<IPropertyDefinitionsApi>().CreatePropertyDefinition(metricPropertyDefinition);
+            var metricPropertyDefinitionResult = ApiFactory.Api<IPropertyDefinitionsApi>().CreatePropertyDefinition(metricPropertyDefinition);
             
             //    Create the property values
             var metricPropertyValueRequest = new PropertyValue(metricValue: new MetricValue(1100000, "GBP"));
@@ -133,11 +133,11 @@ namespace Lusid.Sdk.Examples.Ibor
             );
 
             //    Create the portfolio
-            var portfolioResult = _apiFactory.Api<ITransactionPortfoliosApi>().CreatePortfolio(TestDataUtilities.TutorialScope, createPortfolioRequest);
+            var portfolioResult = ApiFactory.Api<ITransactionPortfoliosApi>().CreatePortfolio(TestDataUtilities.TutorialScope, createPortfolioRequest);
             
             Assert.That(portfolioResult.Id.Code, Is.EqualTo(createPortfolioRequest.Code));
 
-            var portfolioProperties = _apiFactory.Api<IPortfoliosApi>().GetPortfolioProperties(TestDataUtilities.TutorialScope, portfolioResult.Id.Code).Properties;
+            var portfolioProperties = ApiFactory.Api<IPortfoliosApi>().GetPortfolioProperties(TestDataUtilities.TutorialScope, portfolioResult.Id.Code).Properties;
 
             Assert.That(portfolioProperties.Keys, Is.EquivalentTo(new [] { metricPropertyDefinitionResult.Key}));
 
@@ -178,7 +178,7 @@ namespace Lusid.Sdk.Examples.Ibor
             );
             
             //    Create the property definitions
-            var propertyDefinitionResult = _apiFactory.Api<IPropertyDefinitionsApi>().CreatePropertyDefinition(multiValuePropertyDefinition);
+            var propertyDefinitionResult = ApiFactory.Api<IPropertyDefinitionsApi>().CreatePropertyDefinition(multiValuePropertyDefinition);
             
             //    Create the property values
             var propertyValue = PropertyExtensions.CreateLabelSet("PortfolioManager1","PortfolioManager2");
@@ -192,11 +192,11 @@ namespace Lusid.Sdk.Examples.Ibor
             );
 
             //    Create the portfolio
-            var portfolioResult = _apiFactory.Api<ITransactionPortfoliosApi>().CreatePortfolio(TestDataUtilities.TutorialScope, createPortfolioRequest);
+            var portfolioResult = ApiFactory.Api<ITransactionPortfoliosApi>().CreatePortfolio(TestDataUtilities.TutorialScope, createPortfolioRequest);
             
             Assert.That(portfolioResult.Id.Code, Is.EqualTo(createPortfolioRequest.Code));
             
-            var propertiesUpsertResult = _apiFactory.Api<IPortfoliosApi>().UpsertPortfolioProperties(
+            var propertiesUpsertResult = ApiFactory.Api<IPortfoliosApi>().UpsertPortfolioProperties(
                 TestDataUtilities.TutorialScope,
                 portfolioResult.Id.Code,
                 new Dictionary<string, Property>
@@ -209,7 +209,7 @@ namespace Lusid.Sdk.Examples.Ibor
             );
             Assert.That(propertiesUpsertResult.Properties.Values.Single().Value.LabelValueSet, Is.EqualTo(propertyValue.LabelValueSet).Using(PropertyExtensions.LabelValueSetEquality));
 
-            var portfolioProperties = _apiFactory.Api<IPortfoliosApi>().GetPortfolioProperties(TestDataUtilities.TutorialScope, portfolioResult.Id.Code).Properties;
+            var portfolioProperties = ApiFactory.Api<IPortfoliosApi>().GetPortfolioProperties(TestDataUtilities.TutorialScope, portfolioResult.Id.Code).Properties;
 
             Assert.That(portfolioProperties.Keys, Is.EquivalentTo(new [] { propertyDefinitionResult.Key}));
 

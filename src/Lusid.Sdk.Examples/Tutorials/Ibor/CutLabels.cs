@@ -27,13 +27,13 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
         [OneTimeSetUp]
         public void SetUp()
         {
-            _instrumentLoader = new InstrumentLoader(_apiFactory);
+            _instrumentLoader = new InstrumentLoader(ApiFactory);
             _instrumentIds = _instrumentLoader.LoadInstruments();
 
             // Create portfolio for the demo
             //_portfolioCode = _testDataUtilities.CreateTransactionPortfolio(TutorialScope);
             var portfolioRequest = TestDataUtilities.BuildTransactionPortfolioRequest();
-            var portfolio = _transactionPortfoliosApi.CreatePortfolio(TutorialScope, portfolioRequest);
+            var portfolio = TransactionPortfoliosApi.CreatePortfolio(TutorialScope, portfolioRequest);
             _portfolioCode = portfolioRequest.Code;
 
             Assert.That(portfolio?.Id.Code, Is.EqualTo(_portfolioCode));
@@ -43,7 +43,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
         public void TearDown()
         {
             // Clean up the demo portfolio
-            _portfoliosApi.DeletePortfolio(TutorialScope, _portfolioCode);
+            PortfoliosApi.DeletePortfolio(TutorialScope, _portfolioCode);
 
             // Clear up labels created by the demo
             ClearCutLabels();
@@ -114,7 +114,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
             };
 
             // add initial holdings to our portfolio from LDNOpen 5 days ago
-            _transactionPortfoliosApi.SetHoldings(TutorialScope, _portfolioCode, LdnOpenHoldingsCutLabel, LdnOpenHoldings);
+            TransactionPortfoliosApi.SetHoldings(TutorialScope, _portfolioCode, LdnOpenHoldingsCutLabel, LdnOpenHoldings);
 
             var expectedLdnOpenCashHoldings = TestDataUtilities.BuildCashPortfolioHolding(Currency, currencyLuid, (decimal)100000.0);
             var expectedLdnOpenInstrument1Holdings = TestDataUtilities.BuildPortfolioHolding(Currency, instrument1, (decimal)100.0, (decimal)10100.0);
@@ -182,7 +182,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
             };
 
             // Add transactions to the portfolio
-            _transactionPortfoliosApi.UpsertTransactions(
+            TransactionPortfoliosApi.UpsertTransactions(
                 scope: TutorialScope,
                 code: _portfolioCode,
                 transactionRequest: transactions
@@ -252,7 +252,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
            List<PortfolioHolding> expectedHoldings)
         {
             // check that holdings are as expected after transactions for each instrument
-            var holdings = _transactionPortfoliosApi.GetHoldings(
+            var holdings = TransactionPortfoliosApi.GetHoldings(
                 scope: TutorialScope,
                 code: _portfolioCode,
                 effectiveAt: getHoldingsCutLabel
@@ -290,7 +290,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
                 timeZone: timeZone
             );
             // Send the request to LUSID to create the cut label, if it doesn't already
-            var result = _cutLabelDefinitionsApi.CreateCutLabelDefinition(request);
+            var result = CutLabelDefinitionsApi.CreateCutLabelDefinition(request);
             // Add the codes of our cut labels to our dictionary
             codeDict[request.DisplayName] = request.Code;
 
@@ -307,7 +307,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
             {
                 try
                 {
-                    _cutLabelDefinitionsApi.DeleteCutLabelDefinition(labelCode);
+                    CutLabelDefinitionsApi.DeleteCutLabelDefinition(labelCode);
                 }
                 catch (Client.ApiException e)
                 {

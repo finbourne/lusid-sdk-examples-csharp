@@ -21,7 +21,7 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
         [OneTimeSetUp]
         public void SetUp()
         {
-            var instrumentsLoader = new InstrumentLoader(_apiFactory);
+            var instrumentsLoader = new InstrumentLoader(ApiFactory);
             _instrumentIds = instrumentsLoader.LoadInstruments().OrderBy(x => x).ToList();
 
             var uuid = Guid.NewGuid().ToString();
@@ -29,7 +29,7 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
 
             try
             {
-                _corporateActionSourcesApi.CreateCorporateActionSource(
+                CorporateActionSourcesApi.CreateCorporateActionSource(
                     new CreateCorporateActionSourceRequest(
                         TestDataUtilities.TutorialScope,
                         _corpActionTestSource,
@@ -55,7 +55,7 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
         {
             try
             {
-                _corporateActionSourcesApi.DeleteCorporateActionSource(
+                CorporateActionSourcesApi.DeleteCorporateActionSource(
                         TestDataUtilities.TutorialScope,
                         _corpActionTestSource
                     );
@@ -76,14 +76,14 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
         [Test]
         public void List_Corporate_Action_Sources()
         {
-            var sources = _corporateActionSourcesApi.ListCorporateActionSources();
+            var sources = CorporateActionSourcesApi.ListCorporateActionSources();
             Assert.Greater(sources.Values.Count, 0);
         }
 
         [Test, Ignore("Not implemented")]
         public void List_Corporate_Actions_For_One_Day()
         {
-            var result = _corporateActionSourcesApi.GetCorporateActions(
+            var result = CorporateActionSourcesApi.GetCorporateActions(
                 scope: "UK_High_Growth_Equities_Fund_a4fb",
                 code: "UK_High_Growth_Equities_Fund_base_fund_corporate_action_source"
             );
@@ -122,7 +122,7 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
                     code: _corpActionTestSource
                     )
             );
-            _transactionPortfoliosApi.CreatePortfolio(TestDataUtilities.TutorialScope, request);
+            TransactionPortfoliosApi.CreatePortfolio(TestDataUtilities.TutorialScope, request);
 
             // Add starting cash position
             transactions.Add(TestDataUtilities.BuildCashFundsInTransactionRequest(2960000, "GBP", startDate));
@@ -130,7 +130,7 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
             // Add an equity position
             transactions.Add(TestDataUtilities.BuildTransactionRequest(_instrumentIds[0], 132000, 5, "GBP", startDate, "StockIn"));
 
-            _apiFactory.Api<ITransactionPortfoliosApi>().UpsertTransactions(TestDataUtilities.TutorialScope, portfolioCode, transactions);
+            ApiFactory.Api<ITransactionPortfoliosApi>().UpsertTransactions(TestDataUtilities.TutorialScope, portfolioCode, transactions);
 
             // Upsert Corporate Action
             var identifierMappingInput = new Dictionary<string, string>();
@@ -158,12 +158,12 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
                     }
                 });
 
-            _corporateActionSourcesApi.BatchUpsertCorporateActions(TestDataUtilities.TutorialScope, _corpActionTestSource, new List<UpsertCorporateActionRequest>() { stockSplitCorpActionRequest });
+            CorporateActionSourcesApi.BatchUpsertCorporateActions(TestDataUtilities.TutorialScope, _corpActionTestSource, new List<UpsertCorporateActionRequest>() { stockSplitCorpActionRequest });
 
             //
             // fetch holdings pre ex-dividend date
             //
-            var holdingsResultPreExDate = _transactionPortfoliosApi.GetHoldings(TestDataUtilities.TutorialScope, portfolioCode, effectiveAt: preExDate);
+            var holdingsResultPreExDate = TransactionPortfoliosApi.GetHoldings(TestDataUtilities.TutorialScope, portfolioCode, effectiveAt: preExDate);
             var holdingsPreExDate = holdingsResultPreExDate.Values.OrderBy(h => h.InstrumentUid).ToList();
 
             // check for 2 holdings records
@@ -182,7 +182,7 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
             //
             // fetch holdings after the ex-dividend date but before the payment date
             //
-            var holdingsResultPostExDate = _transactionPortfoliosApi.GetHoldings(TestDataUtilities.TutorialScope, portfolioCode, effectiveAt: prePaymentDate);
+            var holdingsResultPostExDate = TransactionPortfoliosApi.GetHoldings(TestDataUtilities.TutorialScope, portfolioCode, effectiveAt: prePaymentDate);
             var holdingsPostExDate = holdingsResultPostExDate.Values.OrderBy(h => h.InstrumentUid).ToList();
 
             // check for 3 holdings records (will include an accrued amount seperately)
@@ -206,7 +206,7 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
             //
             // fetch holdings after the the payment date
             //
-            var holdingsResultPostPayDate = _transactionPortfoliosApi.GetHoldings(TestDataUtilities.TutorialScope, portfolioCode, effectiveAt: postPaymentDate);
+            var holdingsResultPostPayDate = TransactionPortfoliosApi.GetHoldings(TestDataUtilities.TutorialScope, portfolioCode, effectiveAt: postPaymentDate);
             var holdingsPostPayDate = holdingsResultPostPayDate.Values.OrderBy(h => h.InstrumentUid).ToList();
 
             // check for 2 holdings records (accrued amount now realized)
@@ -250,7 +250,7 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
                     code: _corpActionTestSource
                     )
             );
-            _transactionPortfoliosApi.CreatePortfolio(TestDataUtilities.TutorialScope, request);
+            TransactionPortfoliosApi.CreatePortfolio(TestDataUtilities.TutorialScope, request);
 
             // Add starting cash position
             transactions.Add(TestDataUtilities.BuildCashFundsInTransactionRequest(2960000, "GBP", startDate));
@@ -258,7 +258,7 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
             // Add an equity position
             transactions.Add(TestDataUtilities.BuildTransactionRequest(_instrumentIds[0], 132000, 5, "GBP", startDate, "StockIn"));
 
-            _apiFactory.Api<ITransactionPortfoliosApi>().UpsertTransactions(TestDataUtilities.TutorialScope, portfolioCode, transactions);
+            ApiFactory.Api<ITransactionPortfoliosApi>().UpsertTransactions(TestDataUtilities.TutorialScope, portfolioCode, transactions);
 
             // Upsert Corporate Action   
             var identifierMapping = new Dictionary<string, string>();
@@ -283,12 +283,12 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
                     }
                 });
 
-            _corporateActionSourcesApi.BatchUpsertCorporateActions(TestDataUtilities.TutorialScope, _corpActionTestSource, new List<UpsertCorporateActionRequest>() { stockSplitCorpActionRequest });
+            CorporateActionSourcesApi.BatchUpsertCorporateActions(TestDataUtilities.TutorialScope, _corpActionTestSource, new List<UpsertCorporateActionRequest>() { stockSplitCorpActionRequest });
 
             //
             // fetch holdings pre ex-dividend date
             //
-            var holdingsResultPreExDate = _transactionPortfoliosApi.GetHoldings(TestDataUtilities.TutorialScope, portfolioCode, effectiveAt: announcementDate);
+            var holdingsResultPreExDate = TransactionPortfoliosApi.GetHoldings(TestDataUtilities.TutorialScope, portfolioCode, effectiveAt: announcementDate);
             var holdingsPreExDate = holdingsResultPreExDate.Values.OrderBy(h => h.InstrumentUid).ToList();
 
             //  check stock quantity hasn't changed
@@ -300,7 +300,7 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
             //
             // fetch holdings post ex-dividend date but pre pay date
             //
-            var holdingsResultPostExDate = _transactionPortfoliosApi.GetHoldings(TestDataUtilities.TutorialScope, portfolioCode, effectiveAt: recordDate);
+            var holdingsResultPostExDate = TransactionPortfoliosApi.GetHoldings(TestDataUtilities.TutorialScope, portfolioCode, effectiveAt: recordDate);
             var holdingsPostExDate = holdingsResultPostExDate.Values.OrderBy(h => h.InstrumentUid).ToList();
 
             //  check stock quantity has doubled for unsettled units
@@ -312,7 +312,7 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
             //
             // fetch holdings post pay date
             //
-            var holdingsResultPostPayDate = _transactionPortfoliosApi.GetHoldings(TestDataUtilities.TutorialScope, portfolioCode, effectiveAt: postSplitDate);
+            var holdingsResultPostPayDate = TransactionPortfoliosApi.GetHoldings(TestDataUtilities.TutorialScope, portfolioCode, effectiveAt: postSplitDate);
             var holdingsPostPayDate = holdingsResultPostPayDate.Values.OrderBy(h => h.InstrumentUid).ToList();
 
             //  check stock quantity has doubled for settled and unseltted units
@@ -344,7 +344,7 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
             var postNameChangeDate = new DateTimeOffset(2021, 9, 3, 0, 0, 0, TimeSpan.Zero);
 
             // Upsert Instruments
-            var upsertResponse = _apiFactory.Api<IInstrumentsApi>().UpsertInstruments(instruments.ToDictionary(
+            var upsertResponse = ApiFactory.Api<IInstrumentsApi>().UpsertInstruments(instruments.ToDictionary(
                 k => k.Figi,
                 v => new InstrumentDefinition(
                     name: v.Name,
@@ -352,7 +352,7 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
                 )
             ));
 
-            var instResponse = _apiFactory.Api<IInstrumentsApi>().GetInstruments("Figi", instruments.Select(i => i.Figi).ToList());
+            var instResponse = ApiFactory.Api<IInstrumentsApi>().GetInstruments("Figi", instruments.Select(i => i.Figi).ToList());
             var luidOriginal = instResponse.Values.Where(i => i.Key == originalInstrument.Figi).Select(i => i.Value.LusidInstrumentId).First();
             var luidNew = instResponse.Values.Where(i => i.Key == newInstrument.Figi).Select(i => i.Value.LusidInstrumentId).First();
 
@@ -367,11 +367,11 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
                     code: _corpActionTestSource
                     )
             );
-            _transactionPortfoliosApi.CreatePortfolio(TestDataUtilities.TutorialScope, request);
+            TransactionPortfoliosApi.CreatePortfolio(TestDataUtilities.TutorialScope, request);
 
             // Add a transaction for the original instrument
             transactions.Add(TestDataUtilities.BuildTransactionRequest(luidOriginal, 60000, 122.0M, "GBP", initialDate, "StockIn"));
-            _apiFactory.Api<ITransactionPortfoliosApi>().UpsertTransactions(TestDataUtilities.TutorialScope, portfolioCode, transactions);
+            ApiFactory.Api<ITransactionPortfoliosApi>().UpsertTransactions(TestDataUtilities.TutorialScope, portfolioCode, transactions);
 
             // Upsert Corporate Action
             var identifierMappingInput = new Dictionary<string, string>();
@@ -403,22 +403,22 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
                     }
                 });
 
-            _corporateActionSourcesApi.BatchUpsertCorporateActions(TestDataUtilities.TutorialScope, _corpActionTestSource, new List<UpsertCorporateActionRequest>() { stockSplitCorpActionRequest });
+            CorporateActionSourcesApi.BatchUpsertCorporateActions(TestDataUtilities.TutorialScope, _corpActionTestSource, new List<UpsertCorporateActionRequest>() { stockSplitCorpActionRequest });
 
             // Fetch our holdings before the name change date
-            var holdingsPreNameChange = _transactionPortfoliosApi.GetHoldings(TestDataUtilities.TutorialScope, portfolioCode, effectiveAt: initialDate);
+            var holdingsPreNameChange = TransactionPortfoliosApi.GetHoldings(TestDataUtilities.TutorialScope, portfolioCode, effectiveAt: initialDate);
             var holdingsPreNameChangeList = holdingsPreNameChange.Values.OrderBy(h => h.InstrumentUid).ToList();
 
             Assert.That(holdingsPreNameChangeList[0].InstrumentUid, Is.EqualTo(luidOriginal));
 
             // Fetch our holdings after the name change date
-            var holdingsPostNameChange = _transactionPortfoliosApi.GetHoldings(TestDataUtilities.TutorialScope, portfolioCode, effectiveAt: postNameChangeDate);
+            var holdingsPostNameChange = TransactionPortfoliosApi.GetHoldings(TestDataUtilities.TutorialScope, portfolioCode, effectiveAt: postNameChangeDate);
             var holdingsPostNameChangeList = holdingsPostNameChange.Values.OrderBy(h => h.InstrumentUid).ToList();
 
             Assert.That(holdingsPostNameChangeList[0].InstrumentUid, Is.EqualTo(luidNew));
 
-            _apiFactory.Api<IInstrumentsApi>().DeleteInstrument("Figi", originalInstrument.Figi);
-            _apiFactory.Api<IInstrumentsApi>().DeleteInstrument("Figi", newInstrument.Figi);
+            ApiFactory.Api<IInstrumentsApi>().DeleteInstrument("Figi", originalInstrument.Figi);
+            ApiFactory.Api<IInstrumentsApi>().DeleteInstrument("Figi", newInstrument.Figi);
         }
     }
 }

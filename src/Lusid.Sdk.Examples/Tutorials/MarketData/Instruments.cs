@@ -33,7 +33,7 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
 
         private void SeedInstrumentMaster()
         {
-            var upsertInstrumentsResponse = _instrumentsApi.UpsertInstruments(new Dictionary<string, InstrumentDefinition>
+            var upsertInstrumentsResponse = InstrumentsApi.UpsertInstruments(new Dictionary<string, InstrumentDefinition>
             {
                 ["correlationId1"] = new InstrumentDefinition(
                     name: "VODAFONE GROUP PLC", 
@@ -128,7 +128,7 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
                 unique id, in this case an OpenFigi, and also return a list of aliases
             */
 
-            var lookedUpInstruments = _instrumentsApi.GetInstruments(
+            var lookedUpInstruments = InstrumentsApi.GetInstruments(
                 FigiScheme, 
                 new List<string> {"BBG000C6K6G9"},
                 propertyKeys: new List<string> {IsinPropertyKey, SedolPropertyKey});
@@ -149,7 +149,7 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
         
          private void EnsurePropertyDefinition(string code)
         {
-            var propertyApi = _apiFactory.Api<IPropertyDefinitionsApi>();
+            var propertyApi = ApiFactory.Api<IPropertyDefinitionsApi>();
                 
             try
             {
@@ -179,7 +179,7 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
         public void List_Available_Identifiers()
         {
             //    Get the list of identifier schemes
-            ResourceListOfInstrumentIdTypeDescriptor identifiers = _instrumentsApi.GetInstrumentIdentifierTypes();
+            ResourceListOfInstrumentIdTypeDescriptor identifiers = InstrumentsApi.GetInstrumentIdentifierTypes();
             Assert.Greater(identifiers.Values.Count, 0);
         }
         
@@ -190,7 +190,7 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
             const int pageSize = 5;
             
             //    List the instruments restricting, the number that are returned
-            var instruments = _instrumentsApi.ListInstruments(limit: pageSize);
+            var instruments = InstrumentsApi.ListInstruments(limit: pageSize);
             
             Assert.That(instruments.Values.Count(), Is.LessThanOrEqualTo(pageSize));
         }
@@ -205,7 +205,7 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
             };
             
             //    Get a set of instruments querying by FIGIs
-            var instruments = _instrumentsApi.GetInstruments(identifierType: "Figi", requestBody: figis);
+            var instruments = InstrumentsApi.GetInstruments(identifierType: "Figi", requestBody: figis);
 
             foreach (var figi in figis)
             {
@@ -225,7 +225,7 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
             var propertyKey = $"Instrument/{TestDataUtilities.TutorialScope}/CustomSector";
 
             //    Add it to the instrument
-            _instrumentsApi.UpsertInstrumentsProperties(new List<UpsertInstrumentPropertyRequest>
+            InstrumentsApi.UpsertInstrumentsProperties(new List<UpsertInstrumentPropertyRequest>
             {
                 new UpsertInstrumentPropertyRequest(
                     identifierType: identifierType,
@@ -238,7 +238,7 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
             });
             
             //    Get the instrument with value
-            Instrument instrument = _instrumentsApi.GetInstrument(
+            Instrument instrument = InstrumentsApi.GetInstrument(
                 identifierType: identifierType,
                 identifier: figi,
                 propertyKeys: new List<string> { propertyKey }
@@ -274,7 +274,7 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
                 ));
             
             //    create the swap
-            var createSwapResponse = _instrumentsApi.UpsertInstruments(new Dictionary<string, InstrumentDefinition>
+            var createSwapResponse = InstrumentsApi.UpsertInstruments(new Dictionary<string, InstrumentDefinition>
             {
                 ["correlationId"] = swapDefinition
             });

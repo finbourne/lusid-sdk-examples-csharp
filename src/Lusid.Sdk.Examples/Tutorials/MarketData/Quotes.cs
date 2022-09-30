@@ -33,7 +33,7 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
                     unit: "USD"),
                 lineage: "InternalSystem");
 
-            _quotesApi.UpsertQuotes(TestDataUtilities.TutorialScope, new Dictionary<string, UpsertQuoteRequest> { { "correlationId", request} });
+            QuotesApi.UpsertQuotes(TestDataUtilities.TutorialScope, new Dictionary<string, UpsertQuoteRequest> { { "correlationId", request} });
         }
         
         [LusidFeature("F29")]
@@ -50,7 +50,7 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
             var effectiveDate = new DateTimeOffset(2019, 4, 15, 0, 0, 0, TimeSpan.Zero);
             
             //  Get the close quote for AAPL on 15-Apr-19
-            var quoteResponse = _quotesApi.GetQuotes(
+            var quoteResponse = QuotesApi.GetQuotes(
                 TestDataUtilities.TutorialScope,
                 effectiveAt: effectiveDate.ToString("o"),
                 requestBody: new Dictionary<string, QuoteSeriesId> {{"correlationId", quoteSeriesId}});
@@ -79,7 +79,7 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
             //    Get the quotes for each day in the date range
             var quoteResponses = dateRange
                 .Select(d =>
-                    _quotesApi.GetQuotes(
+                    QuotesApi.GetQuotes(
                         TestDataUtilities.MarketDataScope,
                         effectiveAt: d.ToString("o"),
                         requestBody:

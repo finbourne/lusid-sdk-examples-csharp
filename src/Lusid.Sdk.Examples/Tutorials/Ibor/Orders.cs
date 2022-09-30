@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using Lusid.Sdk.Api;
 using Lusid.Sdk.Client;
+using Lusid.Sdk.Examples.Utilities;
 using Lusid.Sdk.Model;
 using Lusid.Sdk.Utilities;
 using LusidFeatures;
@@ -36,7 +38,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
         [OneTimeSetUp]
         public void SetUp()
         {
-            _instrumentLoader = new InstrumentLoader(_apiFactory);
+            _instrumentLoader = new InstrumentLoader(ApiFactory);
             _instrumentIds = _instrumentLoader.LoadInstruments();
 
             var guid = Guid.NewGuid().ToString();
@@ -51,7 +53,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
         [OneTimeTearDown]
         public void TearDown()
         {
-            var propertyDefinitionApi = _apiFactory.Api<IPropertyDefinitionsApi>();
+            var propertyDefinitionApi = ApiFactory.Api<IPropertyDefinitionsApi>();
 
             try
             {
@@ -81,7 +83,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
                     //    Create the property definitions
                     try
                     {
-                        _apiFactory
+                        ApiFactory
                             .Api<IPropertyDefinitionsApi>()
                             .CreatePropertyDefinition(
                                 createPropertyDefinitionRequest: MakePropertyDefinition(propertyScope: scope,
@@ -148,12 +150,12 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
                         side: "Buy", 
                         state: "New", 
                         type: "Limit", 
-                        date: DateTimeOffset.Parse("2022-07-02")
+                        date: DateTimeOffset.Parse("2022-07-02", null, DateTimeStyles.AssumeUniversal)
                     )
                 });
 
             // We can ask the Orders API to upsert this order for us
-            var upsertResult = _ordersApi.UpsertOrders(request);
+            var upsertResult = OrdersApi.UpsertOrders(request);
 
             // The return gives us a list of orders upserted, and LusidInstrument for each has been mapped to a LUID
             // using the instrument identifiers passed
@@ -200,12 +202,12 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
                         side: "Buy", 
                         state: "New", 
                         type: "Limit", 
-                        date: DateTimeOffset.Parse("2022-07-02")
+                        date: DateTimeOffset.Parse("2022-07-02", null, DateTimeStyles.AssumeUniversal)
                     )
                 });
 
             // We can ask the Orders API to upsert this order for us
-            var upsertResult = _ordersApi.UpsertOrders(initialRequest);
+            var upsertResult = OrdersApi.UpsertOrders(initialRequest);
 
             // The return gives us a list of orders upserted, and LusidInstrument for each has been mapped to a LUID
             // using the instrument identifiers passed
@@ -245,11 +247,11 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
                         side: "Buy",
                         state: "New", 
                         type: "Limit", 
-                        date: DateTimeOffset.Parse("2022-07-02")
+                        date: DateTimeOffset.Parse("2022-07-02", null, DateTimeStyles.AssumeUniversal)
                     )
                 });
 
-            var upsertResult = _ordersApi.UpsertOrders(request);
+            var upsertResult = OrdersApi.UpsertOrders(request);
 
             // The return gives us a list of orders upserted, and LusidInstrument for each has been mapped to a LUID
             // using the instrument identifiers passed
@@ -288,11 +290,11 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
                         side: "Buy",
                         state: "New", 
                         type: "Limit", 
-                        date: DateTimeOffset.Parse("2022-07-02")
+                        date: DateTimeOffset.Parse("2022-07-02", null, DateTimeStyles.AssumeUniversal)
                         )
                 });
             
-            upsertResult = _ordersApi.UpsertOrders(updateRequest);
+            upsertResult = OrdersApi.UpsertOrders(updateRequest);
             
             // The return gives us a list of orders upserted, and LusidInstrument for each has been mapped to a LUID
             // using the instrument identifiers passed. We can see that the quantity has been udpated, and properties added
@@ -347,7 +349,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
                         side: "Buy",
                         state: "New", 
                         type: "Limit", 
-                        date: DateTimeOffset.Parse("2022-07-02")
+                        date: DateTimeOffset.Parse("2022-07-02", null, DateTimeStyles.AssumeUniversal)
                     ),
                     new OrderRequest(
                         id: orderId2,
@@ -376,7 +378,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
                         side: "Sell",
                         state: "New", 
                         type: "Limit", 
-                        date: DateTimeOffset.Parse("2022-07-02")
+                        date: DateTimeOffset.Parse("2022-07-02", null, DateTimeStyles.AssumeUniversal)
                     ),
                     new OrderRequest(
                         id: orderId3,
@@ -405,12 +407,12 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
                         side: "Buy",
                         state: "New", 
                         type: "Limit", 
-                        date: DateTimeOffset.Parse("2022-07-02")
+                        date: DateTimeOffset.Parse("2022-07-02", null, DateTimeStyles.AssumeUniversal)
                     )
                 });
 
             // We can ask the Orders API to upsert these orders for us
-            var upsertResult = _ordersApi.UpsertOrders(request);
+            var upsertResult = OrdersApi.UpsertOrders(request);
 
             // The return gives us a list of orders upserted, and LusidInstrument for each has been mapped to a LUID
             // using the instrument identifiers passed
@@ -427,7 +429,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
             // we wait for a few seconds whilst this happens.
             Thread.Sleep(5000);
 
-            var quantityFilter = _ordersApi.ListOrders(
+            var quantityFilter = OrdersApi.ListOrders(
                 asAt: t,
                 filter:
                       $"Quantity gt 100 "
