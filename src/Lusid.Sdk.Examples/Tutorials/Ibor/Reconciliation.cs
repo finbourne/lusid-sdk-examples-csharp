@@ -20,7 +20,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
         public void SetUp()
         {
             
-            _instrumentLoader = new InstrumentLoader(_apiFactory);
+            _instrumentLoader = new InstrumentLoader(ApiFactory);
             _instrumentIds = _instrumentLoader.LoadInstruments();
         }
         
@@ -30,7 +30,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
         {
             //var portfolioCode = _testDataUtilities.CreateTransactionPortfolio(TestDataUtilities.TutorialScope);
             var portfolioRequest = TestDataUtilities.BuildTransactionPortfolioRequest();
-            var portfolio = _transactionPortfoliosApi.CreatePortfolio(TestDataUtilities.TutorialScope, portfolioRequest);
+            var portfolio = TransactionPortfoliosApi.CreatePortfolio(TestDataUtilities.TutorialScope, portfolioRequest);
             Assert.That(portfolio?.Id.Code, Is.EqualTo(portfolioRequest.Code));
             
             var today = new DateTimeOffset(DateTimeOffset.UtcNow.Date).ToUniversalTime();
@@ -47,7 +47,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
             };
             
             //    Add transactions
-            _apiFactory.Api<ITransactionPortfoliosApi>().UpsertTransactions(TestDataUtilities.TutorialScope, portfolioRequest.Code, yesterdaysTransactions);
+            ApiFactory.Api<ITransactionPortfoliosApi>().UpsertTransactions(TestDataUtilities.TutorialScope, portfolioRequest.Code, yesterdaysTransactions);
 
             var todaysTransactions = new List<TransactionRequest>
             {
@@ -60,7 +60,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
             };
 
             //    add transactions
-            var finalResult = _apiFactory.Api<ITransactionPortfoliosApi>().UpsertTransactions(TestDataUtilities.TutorialScope, portfolioRequest.Code, todaysTransactions);
+            var finalResult = ApiFactory.Api<ITransactionPortfoliosApi>().UpsertTransactions(TestDataUtilities.TutorialScope, portfolioRequest.Code, todaysTransactions);
 
             //Using the last result find out its AsAtDate (based on the servers clock at the time of the test)
             var finalAsAtTime = finalResult.Version.AsAtDate;
@@ -80,7 +80,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
                         finalAsAtTime),
                     new List<string>());
 
-            var listOfBreaks = _apiFactory.Api<IReconciliationsApi>().ReconcileHoldings(portfoliosReconciliationRequest: reconcileRequest);
+            var listOfBreaks = ApiFactory.Api<IReconciliationsApi>().ReconcileHoldings(portfoliosReconciliationRequest: reconcileRequest);
 
             /*
                 Expecting 

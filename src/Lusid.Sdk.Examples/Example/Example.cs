@@ -5,7 +5,7 @@ using Lusid.Sdk.Api;
 using Lusid.Sdk.Model;
 using Lusid.Sdk.Utilities;
 
-namespace Examples
+namespace Lusid.Sdk.Examples.Example
 {
     public class Example
     {

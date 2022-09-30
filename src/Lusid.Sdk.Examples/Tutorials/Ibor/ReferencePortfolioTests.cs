@@ -26,7 +26,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
             //  Initialise the API factory
 
             // Load default instruments which will be used in the tests
-            var instrumentsLoader = new InstrumentLoader(_apiFactory);
+            var instrumentsLoader = new InstrumentLoader(ApiFactory);
             _instrumentIds = instrumentsLoader.LoadInstruments().OrderBy(x => x).ToList();
         }
         
@@ -53,14 +53,14 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
             );
 
             //  Create the reference portfolio in LUSID
-            var ReferencePortfolio = _apiFactory.Api<IReferencePortfolioApi>().CreateReferencePortfolio(TutorialScope, request);
+            var ReferencePortfolio = ApiFactory.Api<IReferencePortfolioApi>().CreateReferencePortfolio(TutorialScope, request);
 
             //  Confirm that the portfolio was successfully created.  Any failures will result in
             //  a ApiException being thrown which contain the relevant response code and error message
             Assert.That(ReferencePortfolio.Id.Code, Is.EqualTo(request.Code));
 
             // Delete the portfolio once the test is complete
-            _apiFactory.Api<IPortfoliosApi>().DeletePortfolio(TutorialScope, F39PortfolioCode);
+            ApiFactory.Api<IPortfoliosApi>().DeletePortfolio(TutorialScope, F39PortfolioCode);
         }
         
         [LusidFeature("F40")]
@@ -85,7 +85,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
             );
 
             //  Create the reference portfolio in LUSID
-            var ReferencePortfolio = _apiFactory.Api<IReferencePortfolioApi>().CreateReferencePortfolio(TutorialScope, request);
+            var ReferencePortfolio = ApiFactory.Api<IReferencePortfolioApi>().CreateReferencePortfolio(TutorialScope, request);
 
             // Declare some instruments which we loaded earlier
             var instrument1 = _instrumentIds[0];
@@ -131,9 +131,9 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
                 }
             );
             // Upsert the constituents into LUSID
-            var setConstituents = _apiFactory.Api<IReferencePortfolioApi>().UpsertReferencePortfolioConstituents(TutorialScope, F40PortfolioCode, upsertConstituentsRequest);
+            var setConstituents = ApiFactory.Api<IReferencePortfolioApi>().UpsertReferencePortfolioConstituents(TutorialScope, F40PortfolioCode, upsertConstituentsRequest);
 
-            var constituentHoldings = _apiFactory.Api<IReferencePortfolioApi>().GetReferencePortfolioConstituents(TutorialScope, F40PortfolioCode, date);
+            var constituentHoldings = ApiFactory.Api<IReferencePortfolioApi>().GetReferencePortfolioConstituents(TutorialScope, F40PortfolioCode, date);
 
             // Check the count of holdings
             Assert.That(constituentHoldings.Constituents.Count(), Is.EqualTo(4));
@@ -151,7 +151,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
             Assert.That(constituentHoldings.Constituents[3].Weight, Is.EqualTo(40));
 
             // Delete the portfolio once the test is complete
-             _apiFactory.Api<IPortfoliosApi>().DeletePortfolio(TutorialScope, F40PortfolioCode);
+             ApiFactory.Api<IPortfoliosApi>().DeletePortfolio(TutorialScope, F40PortfolioCode);
         }
     }
 }

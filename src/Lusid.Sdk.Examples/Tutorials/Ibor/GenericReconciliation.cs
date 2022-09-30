@@ -57,7 +57,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
 
             // create the reconciliation request
             var reconciliation = new ReconciliationRequest(valuationRequestOne, valuationRequestTwo);
-            var reconciliationResponse = _apiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
+            var reconciliationResponse = ApiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
 
             // Get the reconciliation of the equity. 
             var equityComparison = reconciliationResponse.Comparisons.Single();
@@ -79,7 +79,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
             // create the new reconciliation request with the mapping 
             reconciliation = new ReconciliationRequest(valuationRequestOne, valuationRequestTwo,
                 new List<ReconciliationLeftRightAddressKeyPair>() {mapping});
-            reconciliationResponse = _apiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
+            reconciliationResponse = ApiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
 
             equityComparison = reconciliationResponse.Comparisons.Single();
 
@@ -135,7 +135,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
             var reconciliation = new ReconciliationRequest(valuationRequestLeft, valuationRequestRight,
                 new List<ReconciliationLeftRightAddressKeyPair>() {mapping}, rules,
                 new List<string>() {TestDataUtilities.InstrumentName});
-            var reconciliationResponse = _apiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
+            var reconciliationResponse = ApiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
             var equityComparison = reconciliationResponse.Comparisons.Single();
 
             // Assert that the reconciliation resulted in a failure to match for PV, and that the
@@ -184,7 +184,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
             var reconciliation = new ReconciliationRequest(valuationRequestLeft, valuationRequestRight,
                 new List<ReconciliationLeftRightAddressKeyPair>() {mapping}, new List<ReconciliationRule>() {pvRule},
                 new List<string>() {TestDataUtilities.InstrumentName});
-            var reconciliationResponse = _apiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
+            var reconciliationResponse = ApiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
             var equityComparison = reconciliationResponse.Comparisons.Single();
 
             // Assert that the reconciliation resulted in a match within tolerance for PV, and that the difference
@@ -235,7 +235,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
                 new List<ReconciliationLeftRightAddressKeyPair>() {mapping},
                 new List<ReconciliationRule>() {relativeRule},
                 new List<string>() {TestDataUtilities.InstrumentName});
-            var reconciliationResponse = _apiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
+            var reconciliationResponse = ApiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
             var equityComparison = reconciliationResponse.Comparisons.Single();
 
             // Assert that the reconciliation matches within tolerance for PV, and that the difference
@@ -282,7 +282,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
             var reconciliation = new ReconciliationRequest(valuationRequestLeft, valuationRequestRight,
                 new List<ReconciliationLeftRightAddressKeyPair>() {mapping, mappingNumeric}, null,
                 new List<string>() {TestDataUtilities.InstrumentName});
-            var reconciliationResponse = _apiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
+            var reconciliationResponse = ApiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
             var equityComparison = reconciliationResponse.Comparisons.Single();
 
             // Even though the values are identical we get a fail to match result by default.
@@ -303,7 +303,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
                 new List<ReconciliationLeftRightAddressKeyPair>() {mapping, mappingNumeric},
                 new List<ReconciliationRule>() {numericRule},
                 new List<string>() {TestDataUtilities.InstrumentName});
-            reconciliationResponse = _apiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
+            reconciliationResponse = ApiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
             equityComparison = reconciliationResponse.Comparisons.Single();
 
             // With a numeric tolerance rule we no longer get a failed to match result and instead get a 
@@ -355,7 +355,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
             var reconciliation = new ReconciliationRequest(valuationRequestLeft, valuationRequestRight,
                 new List<ReconciliationLeftRightAddressKeyPair>() {mapping}, new List<ReconciliationRule>(){numericRule},
                 new List<string>() {TestDataUtilities.InstrumentName});
-            var reconciliationResponse = _apiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
+            var reconciliationResponse = ApiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
             var equityComparison = reconciliationResponse.Comparisons.Single();
 
             // The valuations were in GBP and USD respectively but can return a MatchWithinTolerance if a numeric difference rule is used
@@ -416,7 +416,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
             var reconciliation = new ReconciliationRequest(valuationRequestLeft, valuationRequestRight,
                 new List<ReconciliationLeftRightAddressKeyPair>() {mapping}, rules,
                 new List<string>() {TestDataUtilities.InstrumentName});
-            var reconciliationResponse = _apiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
+            var reconciliationResponse = ApiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
             var equityComparison = reconciliationResponse.Comparisons.Single();
 
             // The difference is the left datetime minus the right datetime
@@ -467,7 +467,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
             var reconciliation = new ReconciliationRequest(valuationRequestLeft, valuationRequestRight,
                 new List<ReconciliationLeftRightAddressKeyPair>() {mapping}, rules,
                 new List<string>() {TestDataUtilities.InstrumentName});
-            var reconciliationResponse = _apiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
+            var reconciliationResponse = ApiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
             var equityComparison = reconciliationResponse.Comparisons.Single();
 
             // Assert that the reconciliation resulted in a failed match between the trader name property
@@ -487,7 +487,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
                 new List<ReconciliationLeftRightAddressKeyPair>() {mapping},
                 new List<ReconciliationRule>() {stringComparisonRule},
                 new List<string>() {TestDataUtilities.InstrumentName});
-            reconciliationResponse = _apiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
+            reconciliationResponse = ApiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
             equityComparison = reconciliationResponse.Comparisons.Single();
 
             // Assert that the reconciliation resulted in a match within tolerance for the trader name property
@@ -507,7 +507,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
                 new List<ReconciliationLeftRightAddressKeyPair>() {swappedMapping},
                 new List<ReconciliationRule>() {stringComparisonRule},
                 new List<string>() {TestDataUtilities.InstrumentName});
-            reconciliationResponse = _apiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
+            reconciliationResponse = ApiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
             equityComparison = reconciliationResponse.Comparisons.Single();
 
             // The reconciliation results in a failed match because John Doe does not contain Mr. John Doe
@@ -560,7 +560,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
             var reconciliation = new ReconciliationRequest(valuationRequestLeft, valuationRequestRight,
                 new List<ReconciliationLeftRightAddressKeyPair>() {mapping}, rules,
                 new List<string>() {TestDataUtilities.InstrumentName});
-            var reconciliationResponse = _apiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
+            var reconciliationResponse = ApiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
             var equityComparison = reconciliationResponse.Comparisons.Single();
 
             // Assert that the reconciliation succeeded for the trader name property, and that the difference contains the 
@@ -610,7 +610,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
             var reconciliation = new ReconciliationRequest(valuationRequestLeft, valuationRequestRight,
                 new List<ReconciliationLeftRightAddressKeyPair>() {mapping}, rules,
                 new List<string>() {TestDataUtilities.InstrumentName});
-            var reconciliationResponse = _apiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
+            var reconciliationResponse = ApiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
             var equityComparison = reconciliationResponse.Comparisons.Single();
 
             // Assert that the reconciliation succeeds within tolerance for the trader name property
@@ -660,7 +660,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
             var reconciliation = new ReconciliationRequest(valuationRequestLeft, valuationRequestRight,
                 new List<ReconciliationLeftRightAddressKeyPair>() {mapping}, rules,
                 new List<string>() {TestDataUtilities.InstrumentName});
-            var reconciliationResponse = _apiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
+            var reconciliationResponse = ApiFactory.Api<ReconciliationsApi>().ReconcileGeneric(reconciliation);
             var equityComparison = reconciliationResponse.Comparisons.Single();
 
             // Assert that the reconciliation succeeds within tolerance for the trader name property
@@ -719,7 +719,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
                 created: transactionDate,
                 subHoldingKeys: new List<string>() {$"Transaction/{scope}/{propertyCode}"}
             );
-            var portfolio = _transactionPortfoliosApi.CreatePortfolio(scope, portfolioRequest);
+            var portfolio = TransactionPortfoliosApi.CreatePortfolio(scope, portfolioRequest);
             Assert.That(portfolio?.Id.Code, Is.EqualTo(_portfolioCode));
 
             // Upsert transaction with trader name property 
@@ -750,7 +750,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
             {
                 (Id: "SSE", Name: "Scottish Power PLC."),
             };            
-            var upsertResponse = _apiFactory.Api<IInstrumentsApi>().UpsertInstruments(instruments.ToDictionary(
+            var upsertResponse = ApiFactory.Api<IInstrumentsApi>().UpsertInstruments(instruments.ToDictionary(
                 k => k.Id,
                 v => new InstrumentDefinition(
                     name: v.Name,
@@ -758,7 +758,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
                 )
             ));
             Assert.That(upsertResponse.Failed.Count, Is.EqualTo(0));
-            var ids = _apiFactory.Api<IInstrumentsApi>().GetInstruments("ClientInternal", instruments.Select(i => i.Id).ToList());
+            var ids = ApiFactory.Api<IInstrumentsApi>().GetInstruments("ClientInternal", instruments.Select(i => i.Id).ToList());
             return ids.Values.First().Value.LusidInstrumentId;
         }
         
@@ -769,7 +769,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
         {
             try
             {
-                _apiFactory.Api<PropertyDefinitionsApi>()
+                ApiFactory.Api<PropertyDefinitionsApi>()
                     .GetPropertyDefinition("Transaction", scope, propertyCode);
             }
             catch (ApiException apiEx)
@@ -786,7 +786,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
                         valueRequired: false,
                         displayName: propertyName,
                         dataTypeId: new ResourceId("system", "string"));
-                    _apiFactory.Api<PropertyDefinitionsApi>().CreatePropertyDefinition(propertyDefinition);
+                    ApiFactory.Api<PropertyDefinitionsApi>().CreatePropertyDefinition(propertyDefinition);
                 }
                 else
                 {
@@ -819,7 +819,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
             };
             var newTransactions = transactionSpecs.Select(id =>
                 BuildTransactionRequest(id.Id, id.Units, id.Price, units, id.TradeDate, "Buy", properties));
-            _apiFactory.Api<ITransactionPortfoliosApi>()
+            ApiFactory.Api<ITransactionPortfoliosApi>()
                 .UpsertTransactions(portfolioScope, portfolioCode, newTransactions.ToList());
         }
 
@@ -878,7 +878,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
             );
 
             // Upload the quote
-            var result = _apiFactory.Api<IQuotesApi>().UpsertQuotes(quoteScope,
+            var result = ApiFactory.Api<IQuotesApi>().UpsertQuotes(quoteScope,
                 new Dictionary<string, UpsertQuoteRequest>() {{"cor_id_one", quote}});
             Assert.That(result.Failed.Count, Is.EqualTo(0));
             return quoteScope;
@@ -901,7 +901,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
                 new DataDefinition("UnitResult/ClientCustomPV", "ClientVal", "decimal", "Leaf"),
             });
             var request = new CreateDataMapRequest(dataMapKey, dataMapping);
-            _structuredResultDataApi.CreateDataMap(dataScope,
+            StructuredResultDataApi.CreateDataMap(dataScope,
                 new Dictionary<string, CreateDataMapRequest> {{"dataMapKey", request}});
             string document = $"LusidInstrumentId, ClientVal\n" +
                               $"{instrumentId}, {upsertedPvValue}"; // Note the LusidInstrumentId the previously defined instrument.
@@ -910,7 +910,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
             StructuredResultDataId structResultDataId =
                 new StructuredResultDataId("Client", documentCode, valuationDate, resultType);
             var upsertDataRequest = new UpsertStructuredResultDataRequest(structResultDataId, structuredResultData);
-            _structuredResultDataApi.UpsertStructuredResultData(dataScope,
+            StructuredResultDataApi.UpsertStructuredResultData(dataScope,
                 new Dictionary<string, UpsertStructuredResultDataRequest> {{documentCode, upsertDataRequest}});
             string resourceKey = "UnitResult/*";
             var resultDataKeyRule = new ResultDataKeyRule(structResultDataId.Source, dataScope, structResultDataId.Code,
@@ -948,7 +948,7 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
 
             //    Upload recipe to Lusid 
             var upsertRecipeRequest = new UpsertRecipeRequest(recipe);
-            var response = _recipeApi.UpsertConfigurationRecipe(upsertRecipeRequest);
+            var response = RecipeApi.UpsertConfigurationRecipe(upsertRecipeRequest);
 
             return (recipeScope, recipeCode);
         }
@@ -1005,8 +1005,8 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
         [TearDown]
         public void TearDown()
         {
-            _portfoliosApi.DeletePortfolio(_portfolioOneScope, _portfolioCode);
-            _portfoliosApi.DeletePortfolio(_portfolioTwoScope, _portfolioCode);
+            PortfoliosApi.DeletePortfolio(_portfolioOneScope, _portfolioCode);
+            PortfoliosApi.DeletePortfolio(_portfolioTwoScope, _portfolioCode);
         }
     }
 }
