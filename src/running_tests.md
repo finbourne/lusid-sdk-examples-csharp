@@ -20,7 +20,7 @@ $ docker run --rm -it --name lusid-sdk-test-csharp -v `pwd`:/usr/src finbourne/l
 
 ## Test Configuration
 
-Create a file named `secrets.json` in the `Lusid.Sdk.Tests` folder with the structure below and populated with the appropriate values.
+Create a file named `secrets.json` in the `Lusid.Sdk.Examples` folder with the structure below and populated with the appropriate values.
 
 ``` json
 {
