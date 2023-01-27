@@ -228,7 +228,8 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
             // Instead we can set a rule which will allow a match within a provided relative tolerance. 
             var relativeRule = new ReconcileNumericRule(ReconcileNumericRule.ComparisonTypeEnum.RelativeDifference,
                 0.05m,
-                new AggregateSpec("Valuation/PV", AggregateSpec.OpEnum.Value));
+                new AggregateSpec("Valuation/PV", AggregateSpec.OpEnum.Value),
+                ReconciliationRule.RuleTypeEnum.ReconcileNumericRule);
 
             // create the reconciliation request
             var reconciliation = new ReconciliationRequest(valuationRequestLeft, valuationRequestRight,
@@ -294,7 +295,8 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
 
             // This can be handled by the introduction of a numeric tolerance comparison rule.
             var numericRule = new ReconcileNumericRule(ReconcileNumericRule.ComparisonTypeEnum.AbsoluteDifference, 0.1m,
-                new AggregateSpec("UnitResult/ClientCustomPV", AggregateSpec.OpEnum.Value));
+                new AggregateSpec("UnitResult/ClientCustomPV", AggregateSpec.OpEnum.Value),
+                ReconciliationRule.RuleTypeEnum.ReconcileNumericRule);
 
             // create the reconciliation request
             reconciliation = new ReconciliationRequest(
@@ -349,7 +351,8 @@ namespace Lusid.Sdk.Examples.Tutorials.Ibor
 
             // This can be handled by the introduction of a numeric tolerance comparison rule.
             var numericRule = new ReconcileNumericRule(ReconcileNumericRule.ComparisonTypeEnum.AbsoluteDifference, 2m,
-                new AggregateSpec("Valuation/PV", AggregateSpec.OpEnum.Value));
+                new AggregateSpec("Valuation/PV", AggregateSpec.OpEnum.Value),
+                ReconciliationRule.RuleTypeEnum.ReconcileNumericRule);
             
             // create the reconciliation request
             var reconciliation = new ReconciliationRequest(valuationRequestLeft, valuationRequestRight,
