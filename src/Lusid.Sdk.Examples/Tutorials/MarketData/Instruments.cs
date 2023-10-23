@@ -8,6 +8,8 @@ using Lusid.Sdk.Examples.Utilities;
 using Lusid.Sdk.Utilities;
 using LusidFeatures;
 using NUnit.Framework;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Lusid.Sdk.Examples.Tutorials.MarketData
 {
@@ -280,6 +282,80 @@ namespace Lusid.Sdk.Examples.Tutorials.MarketData
             });
             
             Assert.That(createSwapResponse.Failed, Is.Empty);
+        }
+
+        [Test, Ignore("Future fix, see CTECH-3342")]
+        // Create an InflationLinkedBond with an InflationIndexConventions with the value for inflationRollDay not specified
+        // inflationRollDay should have a default value of 1. Test that the instrument that is upserted ends up with an inflationRollDay value of 1
+        // This test does not currently pass due to a bug, but this is the correct behavior, and this test should pass once the bug is fixed
+        public void Create_Instrument_With_Optional_Values_Not_Set()
+        {
+            // Create the InflationIndexConventions object
+            var inflationIndexConventions = new InflationIndexConventions(
+                "UKRPI",
+                "GBP",
+                "3M"
+                // inflationRollDay not set
+            );
+
+            // If InflationRollDay is 0 before upsertion and 1 after upsertion,
+            // that means the sdk is treating optional parameters set to the default of their type as if they were not set
+            // (e.g. default(int) == 0, so if an int has a value of 0, it is treated as if it has no value).
+            // This means it is impossible to override a server-side default to choose a value of 0.
+            // (In this case it doesn't matter, because InflationRollDay is not allowed to be 0,
+            // but in general it should be possible for an optional int to be set to 0 instead of the default value.)
+            // So if InflationRollDay == 0 now, this test should not pass, even if it == 1 at the end of the test.
+            Assert.AreNotEqual(inflationIndexConventions.InflationRollDay, 0);
+
+            //    Create a definition for the instrument
+            var instrumentDefinition = new InstrumentDefinition(
+                name: "10mm 5Y Fixed",
+
+                //  The set of identifiers used for identifying the instrument
+                //  e.g. for uploading transactions
+                identifiers: new Dictionary<string, InstrumentIdValue>
+                {
+                    ["ClientInternal"] = new InstrumentIdValue(value: "SW-1")
+                },
+
+                //  The details for valuing the instrument
+                definition: new InflationLinkedBond(
+                                new DateTimeOffset(2021, 11, 24, 0, 0, 0, new TimeSpan()),
+                                new DateTimeOffset(2073, 3, 22, 0, 0, 0, new TimeSpan()),
+                                new FlowConventions("GBP",
+                                                    "6M",
+                                                    "ActualActual",
+                                                    "None",
+                                                    new List<string>(),
+                                                    new List<string>(),
+                                                    0,
+                                                    0),
+                                inflationIndexConventions,
+                                0.00125m,
+                                default,
+                                default,
+                                default,
+                                default,
+                                6,
+                                5,
+                                1000000.0m,
+                                default,
+                                default,
+                                default,
+                                LusidInstrument.InstrumentTypeEnum.InflationLinkedBond              
+            ));
+
+            
+
+            //    create the instrument
+            var createInstrumentResponse = InstrumentsApi.UpsertInstruments(new Dictionary<string, InstrumentDefinition>
+            {
+                ["correlationId"] = instrumentDefinition
+            });
+
+            Assert.That(createInstrumentResponse.Failed, Is.Empty);
+            InflationLinkedBond upsertedInstrument = (InflationLinkedBond)createInstrumentResponse.Values["correlationId"].InstrumentDefinition;
+            Assert.That(upsertedInstrument.InflationIndexConventions.InflationRollDay, Is.EqualTo(1));
         }
     }
 }
