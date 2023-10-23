@@ -8,8 +8,6 @@ using Lusid.Sdk.Examples.Utilities;
 using Lusid.Sdk.Utilities;
 using LusidFeatures;
 using NUnit.Framework;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Lusid.Sdk.Examples.Tutorials.MarketData
 {
