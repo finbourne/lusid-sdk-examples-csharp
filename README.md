@@ -15,3 +15,4 @@ We welcome contributions from our community. See our [contributing guide](docs/C
 ## Build Status
 [![Daily build](https://github.com/finbourne/lusid-sdk-examples-csharp/actions/workflows/cron.yaml/badge.svg)](https://github.com/finbourne/lusid-sdk-examples-csharp/actions/workflows/cron.yaml)
 [![Build and test](https://github.com/finbourne/lusid-sdk-examples-csharp/actions/workflows/build-and-test.yaml/badge.svg)](https://github.com/finbourne/lusid-sdk-examples-csharp/actions/workflows/build-and-test.yaml)
+
