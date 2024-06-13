@@ -1,8 +1,9 @@
+![LUSID_by_Finbourne](./resources/Finbourne_Logo_Teal.svg)
+
 # LUSID<sup>®</sup> SDK Examples C#
 
 This is the C# examples repository for [LUSID by FINBOURNE](https://www.finbourne.com/lusid-technology), a bi-temporal investment management data platform with portfolio accounting capabilities. To use it you'll need a LUSID account. [Sign up for free at lusid.com](https://www.lusid.com/app/signup)
 
-![LUSID_by_Finbourne](https://content.finbourne.com/LUSID_repo.png)
 
 ## Getting Started
 Visit the [repository's wiki](https://github.com/finbourne/lusid-sdk-examples-csharp/wiki) for information on setting up API credentials and running the examples.
